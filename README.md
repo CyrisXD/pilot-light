@@ -2,7 +2,7 @@
 
 **Lid shut. Pilot light on.** A tiny macOS menu bar app that keeps your MacBook awake with the lid closed, so AI coding agents keep working, on under a third of the power.
 
-![Pilot Light: 16.7 W with the lid open, 4.8 W with it closed](site/assets/share.png)
+![Your agents don’t need the lid open, or that much power. 16.7 W with the lid open, 4.8 W with it closed.](site/assets/og.png)
 
 **Website:** [pilotlight.sudolabs.nz](https://pilotlight.sudolabs.nz) · **Download:** [latest release](https://github.com/CyrisXD/pilot-light/releases/latest)
 
