@@ -7,7 +7,7 @@
 - Keeps the Mac awake with the lid closed, using the macOS system sleep setting (power assertions like `caffeinate` cannot override a lid close).
 - Switches to Low Power Mode when the lid closes and restores the exact battery and charger settings when it opens.
 - Turns the display off with the lid closed.
-- Only while you are logged in: log out or switch users and closing the lid sleeps the Mac as normal.
+- Only while you are logged in: log out or switch users and closing the lid sleeps the Mac as normal. It keeps working behind the lock screen; turn off Keep awake when screen locked and it sleeps once the screen locks.
 - Safety cutoffs: with the lid closed, it lets the Mac sleep if macOS reports serious heat or the battery drops below a limit you choose (off, 10%, 15% or 20%).
 - Measures whole-Mac power draw on battery with the lid open and closed, and shows the average watts and estimated battery hours in its menu.
 - One admin prompt installs a helper that can change only the sleep and Low Power settings.
@@ -15,7 +15,7 @@
 ## Measurements
 
 - Measured on a MacBook Pro with M5 Max (macOS 26.6), on battery: 16.7 W with the lid open, 4.8 W with it closed (about 3.5x less). With Claude Code building and testing a website, lid closed: 2.3 W. Heavy local builds draw more, and battery hours are estimates.
-- The app itself: about 25 MB of memory (20–31 MB measured), about 0% CPU while waiting, 900 KB zipped download, one Swift file of 463 lines, no third-party code. Its only network request is a once-a-day update check to GitHub's public releases API (can be turned off in the menu).
+- The app itself: about 25 MB of memory (20–31 MB measured), about 0% CPU while waiting, 900 KB zipped download, one Swift file of 486 lines, no third-party code. Its only network request is a once-a-day update check to GitHub's public releases API (can be turned off in the menu).
 
 ## Requirements and caveats
 

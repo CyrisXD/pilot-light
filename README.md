@@ -15,7 +15,7 @@ When the lid closes while you're logged in, Pilot Light:
 - turns the display off,
 - lets the Mac sleep anyway on serious heat or when the battery drops below your limit.
 
-Log out or switch users and closing the lid sleeps the Mac as normal. The menu shows your Mac's own measured power draw with the lid open and closed.
+It keeps working behind the lock screen. Log out or switch users, and closing the lid sleeps the Mac as normal. Turn off **Keep awake when screen locked** and it also sleeps once the screen locks. The menu shows your Mac's own measured power draw with the lid open and closed.
 
 Once a day it checks GitHub for a newer release and shows **Update available** in the menu if there is one. That's its only network request, and you can turn it off with **Check for updates daily**.
 

@@ -5,7 +5,8 @@ import ServiceManagement
 
 // Pilot Light keeps a MacBook awake with the lid closed while you're logged in, switches it to
 // Low Power Mode and turns the display off, then puts everything back when the lid opens.
-// Logging out, switching users or quitting the app restores normal lid-close sleep.
+// Logging out, switching users or quitting restores normal lid-close sleep, and so does locking the
+// screen when "Keep awake when screen locked" is off.
 
 // Rename this file whenever pmsetCmds changes, so existing installs are asked to reinstall the helper.
 let sudoersPath = "/etc/sudoers.d/pilotlight"
@@ -153,6 +154,7 @@ class App: NSObject, NSApplicationDelegate {
     let removeItem = NSMenuItem(title: "Remove helper…", action: #selector(removeHelper), keyEquivalent: "")
     let lowPowerItem = NSMenuItem(title: "Low Power Mode when lid closed", action: #selector(flipLowPower), keyEquivalent: "")
     let cutoffItem = NSMenuItem(title: "Sleep when battery below", action: nil, keyEquivalent: "")
+    let lockedItem = NSMenuItem(title: "Keep awake when screen locked", action: #selector(flipLocked), keyEquivalent: "")
     let loginItem = NSMenuItem(title: "Launch at login", action: #selector(flipLogin), keyEquivalent: "")
     let updatesItem = NSMenuItem(title: "Check for updates daily", action: #selector(flipUpdates), keyEquivalent: "")
     let updateAvailable = NSMenuItem(title: "", action: #selector(openUpdate), keyEquivalent: "")
@@ -162,6 +164,8 @@ class App: NSObject, NSApplicationDelegate {
     var lowPower: Bool { UserDefaults.standard.object(forKey: "lowPower") as? Bool ?? true }
     var enabled = UserDefaults.standard.object(forKey: "enabled") as? Bool ?? true
     var sessionActive = true
+    var awakeWhenLocked: Bool { UserDefaults.standard.object(forKey: "awakeWhenLocked") as? Bool ?? true }
+    var screenLocked = false
     var wasClosed = false
     var bailed = false // slept for safety; stays asleep until lid opens
     var deskMode = false // lid closed with an external display in use
@@ -170,7 +174,7 @@ class App: NSObject, NSApplicationDelegate {
     var lastChange = Date(), lastSample = Date.distantPast
     var capacityWh = 0.0
 
-    var armed: Bool { enabled && sessionActive && hasLid }
+    var armed: Bool { enabled && sessionActive && hasLid && !(screenLocked && !awakeWhenLocked) }
     var helperOK = FileManager.default.fileExists(atPath: sudoersPath)
     let powerKey = powerModeSettings()?.key
 
@@ -188,7 +192,7 @@ class App: NSObject, NSApplicationDelegate {
         updateAvailable.target = self
         menu.addItem(updateAvailable)
         menu.addItem(updateSeparator)
-        [install, toggle, lowPowerItem, loginItem, updatesItem, cutoffItem].forEach { $0.target = self; menu.addItem($0) }
+        [install, toggle, lowPowerItem, lockedItem, loginItem, updatesItem, cutoffItem].forEach { $0.target = self; menu.addItem($0) }
         menu.addItem(.separator())
         let header = NSMenuItem(title: "Average power on battery", action: nil, keyEquivalent: "")
         header.isEnabled = false
@@ -219,6 +223,15 @@ class App: NSObject, NSApplicationDelegate {
         ws.addObserver(forName: NSWorkspace.sessionDidBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
             self?.sessionActive = true; self?.apply()
         }
+        // With "Keep awake when screen locked" off, any lock (yours, or the automatic one after the display
+        // turns off) ends the stay-awake.
+        let dn = DistributedNotificationCenter.default()
+        dn.addObserver(forName: .init("com.apple.screenIsLocked"), object: nil, queue: .main) { [weak self] _ in
+            self?.screenLocked = true; self?.apply()
+        }
+        dn.addObserver(forName: .init("com.apple.screenIsUnlocked"), object: nil, queue: .main) { [weak self] _ in
+            self?.screenLocked = false; self?.apply()
+        }
         // Posted on logout/shutdown/restart.
         ws.addObserver(forName: NSWorkspace.willPowerOffNotification, object: nil, queue: .main) { _ in restore() }
 
@@ -239,6 +252,8 @@ class App: NSObject, NSApplicationDelegate {
         // so while armed it also stops idle sleep with the lid open. Display sleep is unaffected.
         pmset(armed ? "-a disablesleep 1" : "-a disablesleep 0")
         if !armed { restorePowerMode() }
+        // Turning sleep back on while the lid is already shut doesn't sleep the Mac by itself.
+        if !armed && wasClosed && !deskMode { run("/usr/bin/pmset", ["sleepnow"]) }
         refreshUI()
     }
 
@@ -324,6 +339,8 @@ class App: NSObject, NSApplicationDelegate {
             : deskMode ? "Lid closed with an external display: normal desk use"
             : "Lid close: stay awake, low power, screen off"
         lowPowerItem.state = lowPower ? .on : .off
+        lockedItem.state = awakeWhenLocked ? .on : .off
+        lockedItem.isHidden = !hasLid
         cutoffItem.submenu?.items.forEach { $0.state = $0.tag == minBatteryPercent ? .on : .off }
         loginItem.state = SMAppService.mainApp.status == .enabled ? .on : .off
         updatesItem.state = checkUpdates ? .on : .off
@@ -333,6 +350,11 @@ class App: NSObject, NSApplicationDelegate {
     @objc func flipLowPower() {
         UserDefaults.standard.set(!lowPower, forKey: "lowPower")
         refreshUI()
+    }
+
+    @objc func flipLocked() {
+        UserDefaults.standard.set(!awakeWhenLocked, forKey: "awakeWhenLocked")
+        apply()
     }
 
     @objc func setCutoff(_ sender: NSMenuItem) {
