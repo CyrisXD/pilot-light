@@ -50,7 +50,7 @@
 }
 </script>
 <style>
-/* Night desk: one pinned stage where a real-time 3D MacBook closes as you scroll, then calm sections on an 8px rhythm. */
+/* Layout: a pinned stage where the 3D MacBook closes as you scroll, then content sections on an 8px spacing scale. */
 :root{
   --ink:#05070C;
   --night:#0A1020;
@@ -202,6 +202,42 @@ h3{font-weight:700;letter-spacing:-.02em;line-height:1.15;text-wrap:balance}
   .feat{min-height:0;opacity:1;padding-block:var(--s4)}
 }
 
+/* Safety scenarios: each illustration plays once as it scrolls into view. */
+.safety h2{max-width:18ch}
+.safety .lede{margin-top:var(--s3);max-width:36em}
+.scenarios{margin-top:var(--s6);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s5) var(--s4)}
+.scenario{display:flex;flex-direction:column;gap:var(--s2)}
+.scenario .art{width:100%;height:auto;aspect-ratio:480/300;background:var(--well);border:1px solid var(--rule);border-radius:16px;margin-bottom:var(--s1)}
+.scenario h3{font-size:var(--t-h3)}
+.scenario p{color:var(--muted);max-width:30em;text-wrap:pretty}
+@media (max-width:760px){.scenarios{grid-template-columns:minmax(0,1fr)}}
+.scenario .bag,.scenario .waves,.scenario .asleep,.scenario .hot,.scenario .status{opacity:0}
+.scenario .status{fill:var(--muted)}
+.scenario .mercury{fill:var(--slate);transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(.22)}
+.scenario .bulb{fill:var(--slate)}
+.scenario .charge{fill:var(--flame);transform-box:fill-box;transform-origin:0 50%}
+.scenario .lit{transform-box:fill-box;transform-origin:50% 50%}
+.scenario.play .bag{animation:sc-bag .8s var(--ease) .2s both}
+.scenario.play .waves{animation:sc-waves 2.4s ease-in-out 1s both}
+.scenario.play .mercury{animation:sc-mercury 2.4s cubic-bezier(.5,0,.3,1) 1s both}
+.scenario.play .bulb{animation:sc-hotfill 2.4s cubic-bezier(.5,0,.3,1) 1s both}
+.scenario.play .hot{animation:sc-in .5s var(--ease) 3.2s both}
+.scenario.play .charge{animation:sc-drain 3s cubic-bezier(.4,0,.4,1) .4s both}
+.scenario.play .lit{animation:sc-out .7s var(--ease) both}
+#sc-heat.play .lit{animation-delay:3.5s}
+#sc-battery.play .lit{animation-delay:3.4s}
+.scenario.play .asleep,.scenario.play .status{animation:sc-in .7s var(--ease) both}
+#sc-heat.play .asleep,#sc-heat.play .status{animation-delay:3.9s}
+#sc-battery.play .asleep,#sc-battery.play .status{animation-delay:3.8s}
+@keyframes sc-bag{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}
+@keyframes sc-waves{0%{opacity:0;transform:translateY(8px)}30%{opacity:1}100%{opacity:.85;transform:translateY(-6px)}}
+@keyframes sc-mercury{from{transform:scaleY(.22);fill:#5C6F92}60%{fill:#FF8A3D}to{transform:scaleY(.92);fill:#FF5A2E}}
+@keyframes sc-hotfill{from{fill:#5C6F92}60%{fill:#FF8A3D}to{fill:#FF5A2E}}
+@keyframes sc-drain{from{transform:scaleX(.8);fill:#FF8A3D}to{transform:scaleX(.15);fill:#FFB547}}
+@keyframes sc-out{to{opacity:0;transform:scale(.4)}}
+@keyframes sc-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.scenario .charge{transform:scaleX(.8)}
+
 /* Specs */
 .specs h2,.install h2{margin-bottom:var(--s5)}
 .spec{display:grid;grid-template-columns:minmax(160px,260px) minmax(0,1fr);gap:var(--s3);padding-block:var(--s3);border-top:1px solid var(--rule)}
@@ -261,6 +297,7 @@ pre.code{margin:0;padding:var(--s3);background:var(--well);border:1px solid var(
   .reveal .w{color:var(--text);transition:none}
   .feat{opacity:1;transition:none}
   .btn,.bigmenu .row{transition:none}
+  .scenario *{animation-duration:1ms !important;animation-delay:0s !important}
 }
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
@@ -346,7 +383,7 @@ pre.code{margin:0;padding:var(--s3);background:var(--well);border:1px solid var(
         <div class="row" data-k="awake"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8.5 3 3 7-7"/></svg>Keep awake when lid closed</div>
         <div class="row" data-k="lpm"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8.5 3 3 7-7"/></svg>Low Power Mode when lid closed</div>
         <div class="row"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8.5 3 3 7-7"/></svg>Launch at login</div>
-        <div class="row" data-k="cut"><span class="sp"></span>Sleep when battery below<svg class="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 2.5 3.5 3.5-3.5 3.5"/></svg></div>
+        <div class="row"><span class="sp"></span>Sleep when battery below<svg class="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 2.5 3.5 3.5-3.5 3.5"/></svg></div>
         <div class="sep"></div>
         <div class="grp" data-k="power">
           <div class="row lbl"><span class="sp"></span>Average power on battery</div>
@@ -373,15 +410,63 @@ pre.code{margin:0;padding:var(--s3);background:var(--well);border:1px solid var(
         <h3>Logs out? It sleeps.</h3>
         <p>It keeps the Mac awake only while you’re logged in. Log out or switch users, and closing the lid puts the Mac to sleep as normal.</p>
       </article>
-      <article class="feat" data-k="cut">
-        <h3>Heat and battery cutoffs.</h3>
-        <p>With the lid closed, if macOS reports serious heat or the battery drops below your limit, the Mac goes to sleep anyway.</p>
-      </article>
       <article class="feat" data-k="admin">
         <h3>One admin prompt, tightly scoped.</h3>
         <p>The helper lets Pilot Light change only the sleep and Low Power settings, so it doesn’t need your password every time.</p>
       </article>
     </div>
+  </div>
+</section>
+
+<section class="section safety wrap rule" id="safety" aria-labelledby="safety-h">
+  <h2 id="safety-h" class="h2 up">It knows when to stop.</h2>
+  <p class="lede up">Staying awake is only useful while it’s safe. With the lid closed, Pilot Light lets your Mac sleep anyway in two situations.</p>
+  <div class="scenarios">
+    <article class="scenario" id="sc-heat">
+      <svg class="art" viewBox="0 0 480 300" role="img" aria-label="A closed MacBook is zipped into a bag. A thermometer climbs into the red, the flame on the lid goes out and the Mac goes to sleep.">
+        <line x1="40" y1="262" x2="440" y2="262" stroke="#1A2232" stroke-width="2"/>
+        <g class="bag">
+          <path d="M150 112 C150 70 270 70 270 112" fill="none" stroke="#3A4A66" stroke-width="6" stroke-linecap="round"/>
+          <rect x="96" y="108" width="228" height="154" rx="22" fill="#0F1726" stroke="#3A4A66" stroke-width="3"/>
+          <line x1="110" y1="128" x2="310" y2="128" stroke="#2A3850" stroke-width="2" stroke-dasharray="6 6"/>
+        </g>
+        <g class="mac"><rect x="130" y="196" width="160" height="16" rx="6" fill="#2B2D31" stroke="#4A5160" stroke-width="1.5"/><rect x="138" y="212" width="144" height="5" rx="2.5" fill="#1B1D21"/></g>
+        <g transform="translate(210 178)"><g class="lit"><circle r="22" fill="#FF7A2E" opacity=".25"/><path d="M0 -14 C0 -14 9 -5 9 3 C9 9 5 13 0 13 C-5 13 -9 9 -9 3 C-9 -5 0 -14 0 -14 Z" fill="#FF8A3D"/><path d="M0 0 C0 0 4.5 4.5 4.5 7.5 C4.5 10 2.5 11.5 0 11.5 C-2.5 11.5 -4.5 10 -4.5 7.5 C-4.5 4.5 0 0 0 0 Z" fill="#FFE2A8"/></g></g>
+        <g transform="translate(210 172)"><g class="asleep"><path d="M7 -9 A10 10 0 1 0 9 6 A8 8 0 1 1 7 -9 Z" fill="none" stroke="#A3ACBB" stroke-width="2" stroke-linejoin="round"/><text x="18" y="-4" fill="#A3ACBB" font-size="15" font-weight="600">z</text><text x="28" y="-14" fill="#A3ACBB" font-size="12" font-weight="600">z</text></g></g>
+        <g class="waves" fill="none" stroke="#FF7A2E" stroke-width="2.5" stroke-linecap="round">
+          <path d="M160 92 c6 -8 -6 -14 0 -22 s-6 -14 0 -22"/><path d="M210 88 c6 -8 -6 -14 0 -22 s-6 -14 0 -22"/><path d="M260 92 c6 -8 -6 -14 0 -22 s-6 -14 0 -22"/>
+        </g>
+        <g class="thermo">
+          <rect x="392" y="58" width="22" height="176" rx="11" fill="#0F1726" stroke="#3A4A66" stroke-width="2.5"/>
+          <rect class="mercury" x="397" y="70" width="12" height="164" rx="6"/>
+          <circle cx="403" cy="242" r="17" class="bulb"/>
+          <line x1="372" y1="96" x2="388" y2="96" stroke="#FF5A2E" stroke-width="2"/>
+          <text class="hot" x="366" y="100" text-anchor="end" fill="#FF7A50" font-size="14" font-weight="600">Serious heat</text>
+        </g>
+        <text class="status" x="210" y="292" text-anchor="middle" font-size="15" font-weight="600">Asleep</text>
+      </svg>
+      <h3>Zipped into a bag.</h3>
+      <p>If macOS reports serious heat while the lid is closed, Pilot Light lets the Mac go to sleep instead of cooking.</p>
+    </article>
+    <article class="scenario" id="sc-battery">
+      <svg class="art" viewBox="0 0 480 300" role="img" aria-label="A closed MacBook runs overnight on battery. The charge drains toward a 15% limit, the flame on the lid goes out and the Mac goes to sleep with charge to spare.">
+        <line x1="40" y1="262" x2="440" y2="262" stroke="#1A2232" stroke-width="2"/>
+        <g class="mac"><rect x="40" y="230" width="160" height="16" rx="6" fill="#2B2D31" stroke="#4A5160" stroke-width="1.5"/><rect x="48" y="246" width="144" height="5" rx="2.5" fill="#1B1D21"/></g>
+        <g transform="translate(120 212)"><g class="lit"><circle r="22" fill="#FF7A2E" opacity=".25"/><path d="M0 -14 C0 -14 9 -5 9 3 C9 9 5 13 0 13 C-5 13 -9 9 -9 3 C-9 -5 0 -14 0 -14 Z" fill="#FF8A3D"/><path d="M0 0 C0 0 4.5 4.5 4.5 7.5 C4.5 10 2.5 11.5 0 11.5 C-2.5 11.5 -4.5 10 -4.5 7.5 C-4.5 4.5 0 0 0 0 Z" fill="#FFE2A8"/></g></g>
+        <g transform="translate(120 206)"><g class="asleep"><path d="M7 -9 A10 10 0 1 0 9 6 A8 8 0 1 1 7 -9 Z" fill="none" stroke="#A3ACBB" stroke-width="2" stroke-linejoin="round"/><text x="18" y="-4" fill="#A3ACBB" font-size="15" font-weight="600">z</text><text x="28" y="-14" fill="#A3ACBB" font-size="12" font-weight="600">z</text></g></g>
+        <g class="cell">
+          <rect x="232" y="78" width="196" height="88" rx="16" fill="#0F1726" stroke="#3A4A66" stroke-width="3"/>
+          <rect x="430" y="104" width="10" height="36" rx="4" fill="#3A4A66"/>
+          <rect class="charge" x="242" y="88" width="176" height="68" rx="9"/>
+          <line class="limit" x1="268" y1="70" x2="268" y2="174" stroke="#A3ACBB" stroke-width="2" stroke-dasharray="5 5"/>
+          <text x="268" y="196" text-anchor="middle" fill="#A3ACBB" font-size="14" font-weight="500">Your limit: 15%</text>
+          <text class="pct" x="330" y="132" text-anchor="middle" fill="#F2F4F8" font-size="30" font-weight="700">80%</text>
+        </g>
+        <text class="status" x="120" y="292" text-anchor="middle" font-size="15" font-weight="600">Asleep at 15%</text>
+      </svg>
+      <h3>Running low overnight.</h3>
+      <p>When the battery falls below your limit, it sleeps with charge to spare for the morning. Pick 10, 15 or 20%, or turn it off, in the menu.</p>
+    </article>
   </div>
 </section>
 
@@ -1014,6 +1099,31 @@ addEventListener('resize', request);
 new ResizeObserver(request).observe(canvas);
 frame();
 </script>
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const pct = document.querySelector('#sc-battery .pct');
+  const countDown = () => {
+    if (reduce) { pct.textContent = '15%'; return; }
+    const start = performance.now() + 400, dur = 3000;
+    const step = now => {
+      const t = Math.min(1, Math.max(0, (now - start) / dur));
+      const e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      pct.textContent = Math.round(80 - 65 * e) + '%';
+      if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('play');
+    if (e.target.id === 'sc-battery') countDown();
+    io.unobserve(e.target);
+  }), { threshold: .55 });
+  document.querySelectorAll('.scenario').forEach(el => io.observe(el));
+})();
+</script>
+
 <script>
 // Analytics: GoatCounter (cookie-free). Counts page views, the tagged link clicks
 // (data-goatcounter-click) and how far people get down the page.
