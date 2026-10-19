@@ -3,13 +3,16 @@ import IOKit
 import IOKit.ps
 import ServiceManagement
 
-// Logged in + agent mode: lid close keeps Mac awake, low power on, screen off.
-// Logged out / user switched away / app quits: normal lid-close sleep.
+// Pilot Light keeps a MacBook awake with the lid closed while you're logged in, switches it to
+// Low Power Mode and turns the display off, then puts everything back when the lid opens.
+// Logging out, switching users or quitting the app restores normal lid-close sleep.
 
-// Bump the suffix whenever pmsetCmds changes so existing installs are asked to reinstall.
-let sudoersPath = "/etc/sudoers.d/pilotlight-v2"
-let oldSudoers = ["/etc/sudoers.d/lidguard", "/etc/sudoers.d/pilotlight"]
-// Support submenu: GitHub Sponsors for developers, Buy Me a Coffee for anyone without a GitHub account.
+// Rename this file whenever pmsetCmds changes, so existing installs are asked to reinstall the helper.
+let sudoersPath = "/etc/sudoers.d/pilotlight"
+// Background check that turns lid-close sleep back on if Pilot Light isn't running (after a crash
+// or force quit), so the Mac never stays awake unattended. Bundled in Contents/Library/LaunchAgents.
+let watchdog = SMAppService.agent(plistName: "nz.sudolabs.pilotlight.watchdog.plist")
+
 let supportLinks = [
     ("Sponsor on GitHub", "https://github.com/sponsors/CyrisXD"),
     ("Buy Me a Coffee", "https://buymeacoffee.com/FiRmVXOZh"),
@@ -40,6 +43,14 @@ func lidClosed() -> Bool? {
 }
 let hasLid = lidClosed() != nil
 
+// True when an external display is in use. With the lid closed that's a normal desk setup
+// (clamshell mode), so Pilot Light leaves the displays and power mode alone.
+func externalDisplayActive() -> Bool {
+    var ids = [CGDirectDisplayID](repeating: 0, count: 16), count: UInt32 = 0
+    guard CGGetActiveDisplayList(16, &ids, &count) == .success else { return false }
+    return ids.prefix(Int(count)).contains { CGDisplayIsBuiltin($0) == 0 }
+}
+
 // Current Low Power Mode setting per power source, e.g. ["-b": 1, "-c": 0], from `pmset -g custom`.
 // Key is whichever name this Mac uses; nil if the Mac has no Low Power Mode.
 func powerModeSettings(_ out: String = run("/usr/bin/pmset", ["-g", "custom"])) -> (key: String, values: [String: Int])? {
@@ -54,8 +65,7 @@ func powerModeSettings(_ out: String = run("/usr/bin/pmset", ["-g", "custom"])) 
     return key.map { ($0, values) }
 }
 
-// Tuning knobs for the lid-closed safety cutoffs.
-// Low-battery cutoff from the menu; 0 = off.
+// Safety cutoffs while the lid is closed. The battery limit is set from the menu (0 = off).
 var minBatteryPercent: Int { UserDefaults.standard.object(forKey: "minBattery") as? Int ?? 15 }
 let maxThermal = ProcessInfo.ThermalState.serious
 
@@ -97,6 +107,19 @@ func batteryDraw(_ p: [String: Any]) -> (watts: Double, capacityWh: Double)? {
     return (Double(-ma * mv) / 1e6, Double(mah * mv) / 1e6)
 }
 
+// Update check: compares the latest GitHub release tag ("v1.2.0") with this build's version.
+let releasesAPI = URL(string: "https://api.github.com/repos/CyrisXD/pilot-light/releases/latest")!
+let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
+
+func isNewer(_ tag: String, than current: String) -> Bool {
+    let parts = { (v: String) in v.trimmingCharacters(in: CharacterSet(charactersIn: "vV")).split(separator: ".").map { Int($0) ?? 0 } }
+    let a = parts(tag), b = parts(current)
+    for i in 0..<max(a.count, b.count) where (i < a.count ? a[i] : 0) != (i < b.count ? b[i] : 0) {
+        return (i < a.count ? a[i] : 0) > (i < b.count ? b[i] : 0)
+    }
+    return false
+}
+
 func statLine(_ label: String, sum: Double, n: Int, capacityWh: Double) -> String {
     guard n > 0 else { return "\(label): measuring on battery…" }
     let w = sum / Double(n)
@@ -104,8 +127,8 @@ func statLine(_ label: String, sum: Double, n: Int, capacityWh: Double) -> Strin
     return String(format: "%@: %.1f W%@", label, w, hours)
 }
 
-// Menu bar template glyphs on an 18 pt grid (from the design canvas): solid flame = on,
-// outline = off, outline + dot = setup needed. macOS tints templates for light/dark menu bars.
+// Menu bar template glyphs on an 18 pt grid: solid flame = on, outline = off,
+// outline with a dot = helper not installed. macOS tints templates for light and dark menu bars.
 let flamePath = "M9 1.75 C9 1.75 13.25 6.1 13.25 9.9 C13.25 12.35 11.35 14.25 9 14.25 C6.65 14.25 4.75 12.35 4.75 9.9 C4.75 6.1 9 1.75 9 1.75 Z"
 let lidLine = "<line x1='3.5' y1='16.5' x2='14.5' y2='16.5' stroke='black' stroke-width='1.5' stroke-linecap='round'/>"
 let flameOutline = "<path d='\(flamePath)' fill='none' stroke='black' stroke-width='1.5' stroke-linejoin='round'/>"
@@ -127,14 +150,21 @@ class App: NSObject, NSApplicationDelegate {
     let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     let toggle = NSMenuItem(title: "Keep awake when lid closed", action: #selector(flip), keyEquivalent: "")
     let install = NSMenuItem(title: "Install helper (admin)…", action: #selector(installHelper), keyEquivalent: "")
+    let removeItem = NSMenuItem(title: "Remove helper…", action: #selector(removeHelper), keyEquivalent: "")
     let lowPowerItem = NSMenuItem(title: "Low Power Mode when lid closed", action: #selector(flipLowPower), keyEquivalent: "")
     let cutoffItem = NSMenuItem(title: "Sleep when battery below", action: nil, keyEquivalent: "")
     let loginItem = NSMenuItem(title: "Launch at login", action: #selector(flipLogin), keyEquivalent: "")
+    let updatesItem = NSMenuItem(title: "Check for updates daily", action: #selector(flipUpdates), keyEquivalent: "")
+    let updateAvailable = NSMenuItem(title: "", action: #selector(openUpdate), keyEquivalent: "")
+    let updateSeparator = NSMenuItem.separator()
+    var updateURL: URL?
+    var checkUpdates: Bool { UserDefaults.standard.object(forKey: "checkUpdates") as? Bool ?? true }
     var lowPower: Bool { UserDefaults.standard.object(forKey: "lowPower") as? Bool ?? true }
     var enabled = UserDefaults.standard.object(forKey: "enabled") as? Bool ?? true
     var sessionActive = true
     var wasClosed = false
     var bailed = false // slept for safety; stays asleep until lid opens
+    var deskMode = false // lid closed with an external display in use
     let openStat = NSMenuItem(), closedStat = NSMenuItem()
     let resetStats = NSMenuItem(title: "Reset power averages", action: #selector(reset), keyEquivalent: "")
     var lastChange = Date(), lastSample = Date.distantPast
@@ -153,7 +183,12 @@ class App: NSObject, NSApplicationDelegate {
             cutoffs.addItem(i)
         }
         cutoffItem.submenu = cutoffs
-        [install, toggle, lowPowerItem, loginItem, cutoffItem].forEach { $0.target = self; menu.addItem($0) }
+        updateAvailable.isHidden = true
+        updateSeparator.isHidden = true
+        updateAvailable.target = self
+        menu.addItem(updateAvailable)
+        menu.addItem(updateSeparator)
+        [install, toggle, lowPowerItem, loginItem, updatesItem, cutoffItem].forEach { $0.target = self; menu.addItem($0) }
         menu.addItem(.separator())
         let header = NSMenuItem(title: "Average power on battery", action: nil, keyEquivalent: "")
         header.isEnabled = false
@@ -171,6 +206,9 @@ class App: NSObject, NSApplicationDelegate {
         }
         support.submenu = supportMenu
         menu.addItem(support)
+        removeItem.image = NSImage(systemSymbolName: "trash", accessibilityDescription: nil)
+        removeItem.target = self
+        menu.addItem(removeItem)
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApp.terminate), keyEquivalent: "q"))
         item.menu = menu
 
@@ -185,8 +223,11 @@ class App: NSObject, NSApplicationDelegate {
         ws.addObserver(forName: NSWorkspace.willPowerOffNotification, object: nil, queue: .main) { _ in restore() }
 
         restorePowerMode() // in case a previous run quit or crashed with the lid closed
-        // ponytail: 2s poll of the lid sensor; swap for IOServiceAddInterestNotification if latency matters.
+        if helperOK { try? watchdog.register() }
+        // Polls the lid every 2 seconds. An IOKit interest notification would react faster, but polling is simpler and cheap.
         Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in self?.tick() }
+        Timer.scheduledTimer(withTimeInterval: 24 * 60 * 60, repeats: true) { [weak self] _ in self?.checkForUpdate() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) { [weak self] in self?.checkForUpdate() }
         apply()
     }
 
@@ -210,20 +251,24 @@ class App: NSObject, NSApplicationDelegate {
 
     func tick() {
         let closed = lidClosed() ?? false
-        if closed != wasClosed {
+        let desk = closed && externalDisplayActive()
+        if closed != wasClosed || desk != deskMode {
             wasClosed = closed
+            deskMode = desk
             lastChange = Date()
-            if armed && closed {
+            if armed && closed && !desk {
                 if lowPower { lowPowerOn() }
-                run("/usr/bin/pmset", ["displaysleepnow"]) // also blanks any external display
+                run("/usr/bin/pmset", ["displaysleepnow"])
             } else if armed {
+                // Lid opened, or an external display took over while closed: back to normal.
                 restorePowerMode()
-                apply() // re-arm after a safety sleep
+                apply() // also re-arms after a safety sleep
             }
             refreshUI()
         }
-        // Safety cutoff: lid closed and too hot or battery low → let it sleep.
-        if armed && closed && !bailed, let why = bailReason(ProcessInfo.processInfo.thermalState, batteryPercent()) {
+        // Safety cutoff: lid closed and too hot or battery low → let it sleep. Not in a desk setup,
+        // where someone is using the Mac on an external display.
+        if armed && closed && !desk && !bailed, let why = bailReason(ProcessInfo.processInfo.thermalState, batteryPercent()) {
             NSLog("Pilot Light: sleeping, \(why)")
             bailed = true
             pmset("-a disablesleep 0")
@@ -237,7 +282,7 @@ class App: NSObject, NSApplicationDelegate {
     // and lid-closed time when Pilot Light isn't holding the Mac awake.
     func sample() {
         lastSample = Date()
-        guard Date().timeIntervalSince(lastChange) > 60, !wasClosed || (armed && !bailed),
+        guard Date().timeIntervalSince(lastChange) > 60, !wasClosed || (armed && !bailed && !deskMode),
               let b = batteryDraw() else { return }
         capacityWh = b.capacityWh
         let key = wasClosed ? "closed" : "open", d = UserDefaults.standard
@@ -271,13 +316,17 @@ class App: NSObject, NSApplicationDelegate {
         toggle.isEnabled = hasLid
         toggle.title = hasLid ? "Keep awake when lid closed" : "This Mac has no lid, nothing to do"
         install.isHidden = helper
+        removeItem.isHidden = !helperOK
         lowPowerItem.isHidden = powerKey == nil || !hasLid
         item.button?.image = glyphs[!helper ? "setup" : armed ? "active" : "disabled"]
         item.button?.setAccessibilityLabel(!helper ? "Pilot Light: setup needed" : armed ? "Pilot Light: on" : "Pilot Light: off")
-        item.button?.toolTip = armed ? "Lid close: stay awake, low power, screen off" : "Lid close: sleep"
+        item.button?.toolTip = !armed ? "Lid close: sleep"
+            : deskMode ? "Lid closed with an external display: normal desk use"
+            : "Lid close: stay awake, low power, screen off"
         lowPowerItem.state = lowPower ? .on : .off
         cutoffItem.submenu?.items.forEach { $0.state = $0.tag == minBatteryPercent ? .on : .off }
         loginItem.state = SMAppService.mainApp.status == .enabled ? .on : .off
+        updatesItem.state = checkUpdates ? .on : .off
         refreshStats()
     }
 
@@ -302,6 +351,33 @@ class App: NSObject, NSApplicationDelegate {
         refreshUI()
     }
 
+    // One anonymous request a day to GitHub's public API; nothing about the Mac is sent.
+    func checkForUpdate() {
+        guard checkUpdates else { return }
+        var req = URLRequest(url: releasesAPI)
+        req.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
+        req.setValue("PilotLight/\(appVersion)", forHTTPHeaderField: "User-Agent")
+        URLSession.shared.dataTask(with: req) { data, _, _ in
+            guard let data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let tag = json["tag_name"] as? String, let page = (json["html_url"] as? String).flatMap(URL.init) else { return }
+            DispatchQueue.main.async {
+                let newer = isNewer(tag, than: appVersion)
+                self.updateURL = page
+                self.updateAvailable.title = "Download Pilot Light \(tag.trimmingCharacters(in: CharacterSet(charactersIn: "vV")))"
+                self.updateAvailable.isHidden = !newer
+                self.updateSeparator.isHidden = !newer
+            }
+        }.resume()
+    }
+
+    @objc func openUpdate() { if let u = updateURL { NSWorkspace.shared.open(u) } }
+
+    @objc func flipUpdates() {
+        UserDefaults.standard.set(!checkUpdates, forKey: "checkUpdates")
+        if checkUpdates { checkForUpdate() } else { updateAvailable.isHidden = true; updateSeparator.isHidden = true }
+        refreshUI()
+    }
+
     @objc func openSupport(_ sender: NSMenuItem) { NSWorkspace.shared.open(URL(string: supportLinks[sender.tag].1)!) }
 
     @objc func flip() {
@@ -315,10 +391,28 @@ class App: NSObject, NSApplicationDelegate {
         let rule = "\(user) ALL=(root) NOPASSWD: " + pmsetCmds.map { "/usr/bin/pmset \($0)" }.joined(separator: ", ") + "\n"
         let tmp = NSTemporaryDirectory() + "pilotlight.sudoers"
         try? rule.write(toFile: tmp, atomically: true, encoding: .utf8)
-        let sh = "/usr/sbin/visudo -cf '\(tmp)' && /usr/bin/install -m 0440 -o root -g wheel '\(tmp)' \(sudoersPath) && /bin/rm -f \(oldSudoers.joined(separator: " "))"
+        let sh = "/usr/sbin/visudo -cf '\(tmp)' && /usr/bin/install -m 0440 -o root -g wheel '\(tmp)' \(sudoersPath)"
         NSAppleScript(source: "do shell script \"\(sh)\" with administrator privileges")?.executeAndReturnError(nil)
         helperOK = FileManager.default.fileExists(atPath: sudoersPath)
+        if helperOK { try? watchdog.register() }
         apply()
+    }
+
+    @objc func removeHelper() {
+        let alert = NSAlert()
+        alert.messageText = "Remove the Pilot Light helper?"
+        alert.informativeText = "Your Mac goes back to sleeping when the lid closes. You can install the helper again from this menu."
+        alert.addButton(withTitle: "Remove")
+        alert.addButton(withTitle: "Cancel")
+        alert.buttons[0].hasDestructiveAction = true
+        NSApp.activate(ignoringOtherApps: true)
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        restore() // while sudo still allows it
+        let removed = NSAppleScript(source: "do shell script \"/bin/rm -f \(sudoersPath)\" with administrator privileges")?.executeAndReturnError(nil) != nil
+        guard removed else { return }
+        try? watchdog.unregister()
+        helperOK = FileManager.default.fileExists(atPath: sudoersPath)
+        refreshUI()
     }
 }
 
@@ -354,11 +448,12 @@ if CommandLine.arguments.contains("--selftest") {
     precondition(batteryDraw(["ExternalConnected": true, "Voltage": 12000, "InstantAmperage": 2000, "AppleRawMaxCapacity": 8000]) == nil)
     precondition(pmsetCmds.contains("-b lowpowermode 1") && pmsetCmds.contains("-c powermode 2"))
     precondition(Set(glyphs.keys) == ["active", "disabled", "setup"])
-    print("glyphs from SVG: \(glyphSVG.values.allSatisfy { NSImage(data: Data("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'>\($0)</svg>".utf8)) != nil })")
+    precondition(isNewer("v1.0.1", than: "1.0.0") && isNewer("v1.10.0", than: "1.9.3") && isNewer("2", than: "1.9"))
+    precondition(!isNewer("v1.0.0", than: "1.0.0") && !isNewer("v0.9", than: "1.0.0") && !isNewer("1.0", than: "1.0.0"))
     precondition(supportLinks.allSatisfy { URL(string: $0.1)?.host != nil })
-    print("lid: \(hasLid ? "yes" : "no"), power key: \(powerModeSettings().map { "\($0.key) \($0.values)" } ?? "none")")
-    print("draw now: \(batteryDraw().map { String(format: "%.1f W of %.0f Wh", $0.watts, $0.capacityWh) } ?? "on AC")")
-    print("ok, battery now: \(batteryPercent().map { "\($0)%" } ?? "on AC"), thermal: \(ProcessInfo.processInfo.thermalState.rawValue)")
+    print("Self-test passed.")
+    print("This Mac: lid \(hasLid ? "yes" : "no"), external display \(externalDisplayActive() ? "yes" : "no"), power setting \(powerModeSettings()?.key ?? "none"), " +
+          "battery \(batteryPercent().map { "\($0)%" } ?? "on AC"), draw \(batteryDraw().map { String(format: "%.1f W", $0.watts) } ?? "n/a on AC")")
     exit(0)
 }
 

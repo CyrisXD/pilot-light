@@ -1,6 +1,6 @@
 # Pilot Light
 
-> Pilot Light is a free, open source macOS menu bar app that keeps a MacBook awake with the lid closed while you are logged in, so AI coding agents (Claude Code, Codex and similar) keep working. When the lid closes it switches the Mac to Low Power Mode and turns the display off, and it restores your settings when the lid opens. Made by sudolabs.
+> Pilot Light (public beta) is a free, open source macOS menu bar app that keeps a MacBook awake with the lid closed while you are logged in, so AI coding agents (Claude Code, Codex and similar) keep working. When the lid closes it switches the Mac to Low Power Mode and turns the display off, and it restores your settings when the lid opens. Made by sudolabs.
 
 ## What it does
 
@@ -15,12 +15,15 @@
 ## Measurements
 
 - On a MacBook Pro with M5 Max (macOS 26.6), unplugged, background apps only, no agent workload: 16.7 W with the lid open, 4.8 W with the lid closed after the first minute (about 3.5x less). Battery hours are estimates. Real agent work draws more.
-- The app itself: about 25 MB of memory (20–31 MB measured), about 0% CPU while waiting, 880 KB zipped download, one Swift file of 358 lines, no third-party code, no network requests.
+- The app itself: about 25 MB of memory (20–31 MB measured), about 0% CPU while waiting, 900 KB zipped download, one Swift file of 463 lines, no third-party code. Its only network request is a once-a-day update check to GitHub's public releases API (can be turned off in the menu).
 
 ## Requirements and caveats
 
 - macOS 13 or later; universal app for Apple silicon and Intel. So far tested only on Apple silicon (M5 Max) with macOS 26.6.
-- Not notarized yet: on first launch, right-click the app and choose Open.
+- Not notarized yet: on first launch, open System Settings > Privacy & Security and click Open Anyway.
+- Beta: the heat and battery cutoffs have only been tested on one Mac so far.
+- If the app crashes or is force-quit, a background check installed with the helper turns lid-close sleep back on within a minute.
+- Uninstall: choose Remove helper… in the menu, quit, and delete the app (or `sudo rm /etc/sudoers.d/pilotlight`).
 - While it is on, the Mac also won't idle-sleep with the lid open (the display still turns off).
 
 ## Links

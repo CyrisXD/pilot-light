@@ -41,7 +41,7 @@
   "applicationCategory": "UtilitiesApplication",
   "operatingSystem": "macOS 13 or later",
   "processorRequirements": "Apple silicon or Intel",
-  "fileSize": "880KB",
+  "fileSize": "900KB",
   "downloadUrl": "https://github.com/CyrisXD/pilot-light/releases/latest",
   "isAccessibleForFree": true,
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -110,6 +110,7 @@ h3{font-weight:700;letter-spacing:-.02em;line-height:1.15;text-wrap:balance}
 .nav .wrap{display:flex;align-items:center;gap:var(--s4);height:52px}
 .brand{display:flex;align-items:center;gap:10px;margin-right:auto;color:var(--text);text-decoration:none;font-weight:600;font-size:19px;letter-spacing:-.01em}
 .brand img{width:28px;height:28px}
+.beta{margin-left:2px;padding:2px 8px;border-radius:999px;border:1px solid #2C3850;color:var(--flame-soft);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;line-height:1.4}
 .navlink{color:var(--muted);text-decoration:none;font-size:var(--t-micro)}
 .navlink:hover{color:var(--text)}
 .pill{display:inline-flex;align-items:center;height:32px;padding:0 var(--s2);border-radius:999px;background:var(--flame);color:var(--flame-ink);text-decoration:none;font-size:var(--t-micro);font-weight:600}
@@ -205,6 +206,7 @@ h3{font-weight:700;letter-spacing:-.02em;line-height:1.15;text-wrap:balance}
 /* Safety scenarios: each illustration plays once as it scrolls into view. */
 .safety h2{max-width:18ch}
 .safety .lede{margin-top:var(--s3);max-width:36em}
+.safety .beta-note{margin-top:var(--s2);max-width:40em;color:var(--dim);font-size:var(--t-small)}
 .scenarios{margin-top:var(--s6);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s5) var(--s4)}
 .scenario{display:flex;flex-direction:column;gap:var(--s2)}
 .scenario .art{width:100%;height:auto;aspect-ratio:480/300;background:var(--well);border:1px solid var(--rule);border-radius:16px;margin-bottom:var(--s1)}
@@ -274,12 +276,15 @@ pre.code{margin:0;padding:var(--s3);background:var(--well);border:1px solid var(
 .support .note{margin-top:var(--s3);color:var(--dim)}
 
 /* Footnotes & footer */
-.foot{border-top:1px solid var(--rule);padding-block:var(--s5) var(--s6);color:var(--dim);font-size:var(--t-micro);line-height:1.6}
-.foot ol{margin:0 0 var(--s4);padding-left:18px;max-width:76em}
-.foot li{margin-bottom:var(--s1);color:#8A93A3}
-.foot .row{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);align-items:center}
-.foot .row span{margin-right:auto}
-.foot a{color:#B9C1CE}
+.foot{border-top:1px solid var(--rule);padding-block:var(--s5);color:var(--dim);font-size:var(--t-micro);line-height:1.6}
+.foot ol{margin:0;padding-left:18px;max-width:76em}
+.foot li{margin-bottom:var(--s1)}
+.foot .row{margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);align-items:center;justify-content:space-between}
+.foot .by{display:flex;align-items:center;gap:var(--s1);color:var(--muted);font-size:14px}
+.foot .by img{width:20px;height:20px}
+.foot .links{display:flex;gap:var(--s3)}
+.foot a{color:#B9C1CE;text-decoration:none}
+.foot a:hover{color:var(--text)}
 
 /* Fade-up for supporting copy */
 .up{opacity:0;transform:translateY(28px);transition:opacity 1s var(--ease),transform 1s var(--ease)}
@@ -306,7 +311,7 @@ pre.code{margin:0;padding:var(--s3);background:var(--well);border:1px solid var(
 
 <header class="nav">
   <div class="wrap">
-    <a class="brand" href="#top"><img src="assets/icon-256.png" alt="" width="28" height="28">Pilot Light</a>
+    <a class="brand" href="#top"><img src="assets/icon-256.png" alt="" width="28" height="28">Pilot Light<span class="beta">Beta</span></a>
     <a class="navlink" href="#why">Overview</a>
     <a class="navlink" href="#features">Features</a>
     <a class="navlink" href="#specs">Specs</a>
@@ -331,9 +336,9 @@ pre.code{margin:0;padding:var(--s3);background:var(--well);border:1px solid var(
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
           Download for macOS
         </a>
-        <a data-goatcounter-click="source-hero" class="textlink" href="https://github.com/CyrisXD/pilot-light"><svg class="gh" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>Read the source</a>
+        <a data-goatcounter-click="source-hero" class="btn btn-quiet" href="https://github.com/CyrisXD/pilot-light"><svg class="gh" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>Read the source</a>
       </div>
-      <p class="meta"><span class="nw">Free and open source ·</span> <span class="nw">macOS 13 or later ·</span> <span class="nw">Universal app for Apple silicon and Intel<sup><a href="#fn2">2</a></sup></span></p>
+      <p class="meta"><span class="nw">Free public beta ·</span> <span class="nw">Open source ·</span> <span class="nw">macOS 13 or later ·</span> <span class="nw">Universal app for Apple silicon and Intel<sup><a href="#fn2">2</a></sup></span></p>
     </div>
 
     <div class="captions" aria-hidden="true">
@@ -421,9 +426,11 @@ pre.code{margin:0;padding:var(--s3);background:var(--well);border:1px solid var(
 <section class="section safety wrap rule" id="safety" aria-labelledby="safety-h">
   <h2 id="safety-h" class="h2 up">It knows when to stop.</h2>
   <p class="lede up">Staying awake is only useful while it’s safe. With the lid closed, Pilot Light lets your Mac sleep anyway in two situations.</p>
+  <p class="beta-note up">Pilot Light is in beta, and these cutoffs have only been tested on one Mac so far. If one doesn’t kick in when it should, please <a href="https://github.com/CyrisXD/pilot-light/issues/new">report it on GitHub</a>.</p>
   <div class="scenarios">
     <article class="scenario" id="sc-heat">
       <svg class="art" viewBox="0 0 480 300" role="img" aria-label="A closed MacBook is zipped into a bag. A thermometer climbs into the red, the flame on the lid goes out and the Mac goes to sleep.">
+        <g transform="translate(0 -22)">
         <line x1="40" y1="262" x2="440" y2="262" stroke="#1A2232" stroke-width="2"/>
         <g class="bag">
           <path d="M150 112 C150 70 270 70 270 112" fill="none" stroke="#3A4A66" stroke-width="6" stroke-linecap="round"/>
@@ -443,17 +450,19 @@ pre.code{margin:0;padding:var(--s3);background:var(--well);border:1px solid var(
           <line x1="372" y1="96" x2="388" y2="96" stroke="#FF5A2E" stroke-width="2"/>
           <text class="hot" x="366" y="100" text-anchor="end" fill="#FF7A50" font-size="14" font-weight="600">Serious heat</text>
         </g>
-        <text class="status" x="210" y="292" text-anchor="middle" font-size="15" font-weight="600">Asleep</text>
+                </g>
+        <text class="status" x="210" y="282" text-anchor="middle" font-size="15" font-weight="600">Asleep</text>
       </svg>
       <h3>Zipped into a bag.</h3>
       <p>If macOS reports serious heat while the lid is closed, Pilot Light lets the Mac go to sleep instead of cooking.</p>
     </article>
     <article class="scenario" id="sc-battery">
       <svg class="art" viewBox="0 0 480 300" role="img" aria-label="A closed MacBook runs overnight on battery. The charge drains toward a 15% limit, the flame on the lid goes out and the Mac goes to sleep with charge to spare.">
+        <g transform="translate(0 -22)">
         <line x1="40" y1="262" x2="440" y2="262" stroke="#1A2232" stroke-width="2"/>
-        <g class="mac"><rect x="40" y="230" width="160" height="16" rx="6" fill="#2B2D31" stroke="#4A5160" stroke-width="1.5"/><rect x="48" y="246" width="144" height="5" rx="2.5" fill="#1B1D21"/></g>
-        <g transform="translate(120 212)"><g class="lit"><circle r="22" fill="#FF7A2E" opacity=".25"/><path d="M0 -14 C0 -14 9 -5 9 3 C9 9 5 13 0 13 C-5 13 -9 9 -9 3 C-9 -5 0 -14 0 -14 Z" fill="#FF8A3D"/><path d="M0 0 C0 0 4.5 4.5 4.5 7.5 C4.5 10 2.5 11.5 0 11.5 C-2.5 11.5 -4.5 10 -4.5 7.5 C-4.5 4.5 0 0 0 0 Z" fill="#FFE2A8"/></g></g>
-        <g transform="translate(120 206)"><g class="asleep"><path d="M7 -9 A10 10 0 1 0 9 6 A8 8 0 1 1 7 -9 Z" fill="none" stroke="#A3ACBB" stroke-width="2" stroke-linejoin="round"/><text x="18" y="-4" fill="#A3ACBB" font-size="15" font-weight="600">z</text><text x="28" y="-14" fill="#A3ACBB" font-size="12" font-weight="600">z</text></g></g>
+        <g class="mac"><rect x="40" y="241" width="160" height="16" rx="6" fill="#2B2D31" stroke="#4A5160" stroke-width="1.5"/><rect x="48" y="257" width="144" height="5" rx="2.5" fill="#1B1D21"/></g>
+        <g transform="translate(120 223)"><g class="lit"><circle r="22" fill="#FF7A2E" opacity=".25"/><path d="M0 -14 C0 -14 9 -5 9 3 C9 9 5 13 0 13 C-5 13 -9 9 -9 3 C-9 -5 0 -14 0 -14 Z" fill="#FF8A3D"/><path d="M0 0 C0 0 4.5 4.5 4.5 7.5 C4.5 10 2.5 11.5 0 11.5 C-2.5 11.5 -4.5 10 -4.5 7.5 C-4.5 4.5 0 0 0 0 Z" fill="#FFE2A8"/></g></g>
+        <g transform="translate(120 217)"><g class="asleep"><path d="M7 -9 A10 10 0 1 0 9 6 A8 8 0 1 1 7 -9 Z" fill="none" stroke="#A3ACBB" stroke-width="2" stroke-linejoin="round"/><text x="18" y="-4" fill="#A3ACBB" font-size="15" font-weight="600">z</text><text x="28" y="-14" fill="#A3ACBB" font-size="12" font-weight="600">z</text></g></g>
         <g class="cell">
           <rect x="232" y="78" width="196" height="88" rx="16" fill="#0F1726" stroke="#3A4A66" stroke-width="3"/>
           <rect x="430" y="104" width="10" height="36" rx="4" fill="#3A4A66"/>
@@ -462,7 +471,8 @@ pre.code{margin:0;padding:var(--s3);background:var(--well);border:1px solid var(
           <text x="268" y="196" text-anchor="middle" fill="#A3ACBB" font-size="14" font-weight="500">Your limit: 15%</text>
           <text class="pct" x="330" y="132" text-anchor="middle" fill="#F2F4F8" font-size="30" font-weight="700">80%</text>
         </g>
-        <text class="status" x="120" y="292" text-anchor="middle" font-size="15" font-weight="600">Asleep at 15%</text>
+                </g>
+        <text class="status" x="120" y="282" text-anchor="middle" font-size="15" font-weight="600">Asleep at 15%</text>
       </svg>
       <h3>Running low overnight.</h3>
       <p>When the battery falls below your limit, it sleeps with charge to spare for the morning. Pick 10, 15 or 20%, or turn it off, in the menu.</p>
@@ -474,9 +484,9 @@ pre.code{margin:0;padding:var(--s3);background:var(--well);border:1px solid var(
   <h2 id="specs-h" class="h2 up">Specs and measurements.</h2>
   <dl>
     <div class="spec"><dt>Memory</dt><dd class="big flamefig">~25 MB<span>20–31 MB measured while running</span></dd></div>
-    <div class="spec"><dt>Download</dt><dd class="big">880 KB<span>The whole app, zipped, icon included</span></dd></div>
+    <div class="spec"><dt>Download</dt><dd class="big">900 KB<span>The whole app, zipped, icon included</span></dd></div>
     <div class="spec"><dt>CPU</dt><dd class="big">~0%<span>While waiting. It checks the lid and battery every 2 seconds and reads power every 30.</span></dd></div>
-    <div class="spec"><dt>Code</dt><dd>One Swift file, 358 lines<span>No third-party code, no network requests</span></dd></div>
+    <div class="spec"><dt>Code</dt><dd>One Swift file, 463 lines<span>No third-party code. Its only network request is a daily update check to GitHub, which you can turn off.</span></dd></div>
     <div class="spec"><dt>Requirements</dt><dd>macOS 13 or later<sup><a href="#fn2">2</a></sup><span>Apple silicon and Intel MacBooks</span></dd></div>
     <div class="spec"><dt>Permissions</dt><dd>One admin prompt<span>Sleep and Low Power settings only</span></dd></div>
   </dl>
@@ -487,7 +497,7 @@ pre.code{margin:0;padding:var(--s3);background:var(--well);border:1px solid var(
   <div class="install-grid">
     <div>
       <ol class="steps">
-        <li><div><b>Download and drag to Applications.</b><p>It isn’t notarized yet, so the first time, right-click the app and choose Open.</p></div></li>
+        <li><div><b>Download and drag to Applications.</b><p>It isn’t notarized yet. The first time you open it, go to System Settings › Privacy &amp; Security and click Open Anyway.</p></div></li>
         <li><div><b>Click the flame, then Install helper.</b><p>One admin prompt. The flame turns solid when Pilot Light is on.</p></div></li>
         <li><div><b>Close the lid.</b><p>Screen off, Low Power on, and your agents keep running.</p></div></li>
       </ol>
@@ -501,6 +511,7 @@ cd pilot-light
 open ~/Applications/"Pilot Light.app"</code></pre>
       <p class="note">Needs the Xcode command line tools. Builds a universal app for macOS 13 and later.</p>
       <p class="note">While Pilot Light is on, your Mac won’t idle-sleep with the lid open either. The screen still turns off.</p>
+      <p class="note">To uninstall, choose Remove helper… from the menu, quit Pilot Light and drag it to the Bin.</p>
     </div>
   </div>
 </section>
@@ -508,7 +519,7 @@ open ~/Applications/"Pilot Light.app"</code></pre>
 <section class="section support wrap rule" id="support" aria-labelledby="support-h">
   <img class="support-icon up" src="assets/icon-256.png" alt="" width="72" height="72">
   <h2 id="support-h" class="h2 up">Free. <span class="accent">Kept lit by people like you.</span></h2>
-  <p class="lede up">Pilot Light is free and open source, with no ads, no account and nothing phoning home. If it’s kept your agents running overnight, you can help fund the next update.</p>
+  <p class="lede up">Pilot Light is free and open source, with no ads, no account and no tracking. If it’s kept your agents running overnight, you can help fund the next update.</p>
   <div class="support-ctas up">
     <a data-goatcounter-click="support-github-sponsors" class="btn" href="https://github.com/sponsors/CyrisXD"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>Sponsor on GitHub</a>
     <a data-goatcounter-click="support-buy-me-a-coffee" class="btn btn-quiet" href="https://buymeacoffee.com/FiRmVXOZh"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6h9v4a3.5 3.5 0 0 1-3.5 3.5H6A3.5 3.5 0 0 1 2.5 10V6Z"/><path d="M11.5 7h1a1.75 1.75 0 0 1 0 3.5h-1.2"/><path d="M5.5 1.75v2M8.5 1.75v2"/></svg>Buy me a coffee</a>
@@ -525,9 +536,12 @@ open ~/Applications/"Pilot Light.app"</code></pre>
       <li id="fn2">So far tested only on Apple silicon (M5 Max) with macOS 26.6. On macOS 13, the menu bar icon may fall back to the system flame symbol.</li>
     </ol>
     <div class="row">
-      <span>Pilot Light is made by <a href="https://sudolabs.nz">sudolabs</a>. Open source under the <a href="https://github.com/CyrisXD/pilot-light/blob/main/LICENSE">MIT license</a>. The MacBook shown is an illustration drawn in real time, not a photo. Visits are counted with GoatCounter: no cookies, nothing personal.</span>
-      <a data-goatcounter-click="source-footer" class="ghlink" href="https://github.com/CyrisXD/pilot-light"><svg class="gh" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>GitHub</a>
-      <a data-goatcounter-click="support-footer" href="#support">Support development</a>
+      <span class="by"><img src="assets/icon-256.png" alt="" width="20" height="20">Pilot Light by <a href="https://sudolabs.nz">sudolabs</a></span>
+      <nav class="links" aria-label="Footer">
+        <a data-goatcounter-click="source-footer" href="https://github.com/CyrisXD/pilot-light">GitHub</a>
+        <a data-goatcounter-click="support-footer" href="#support">Support</a>
+        <a href="https://github.com/CyrisXD/pilot-light/blob/main/LICENSE">MIT license</a>
+      </nav>
     </div>
   </div>
 </footer>

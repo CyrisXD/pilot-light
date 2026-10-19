@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Every minute: if Pilot Light isn't running but lid-close sleep is still disabled, turn it back on. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>nz.sudolabs.pilotlight.watchdog</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>/usr/bin/pgrep -qx PilotLight || ! /usr/bin/pmset -g | /usr/bin/grep -q 'SleepDisabled[[:space:]]*1' || /usr/bin/sudo -n /usr/bin/pmset -a disablesleep 0</string>
+  </array>
+  <key>StartInterval</key><integer>60</integer>
+  <key>RunAtLoad</key><true/>
+  <key>ProcessType</key><string>Background</string>
+</dict>
+</plist>
