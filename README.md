@@ -27,7 +27,7 @@ Once a day it checks GitHub for a newer release and shows **Update available** i
 | App CPU while waiting | ~0% |
 | Download | 900 KB |
 
-¹ MacBook Pro with M5 Max, macOS 26.6, unplugged, background apps only, no agent workload. Battery hours are estimates. Real agent work draws more.
+¹ MacBook Pro with M5 Max (macOS 26.6), on battery. With Claude Code building and testing a website, lid closed: 2.3 W. Heavy local builds draw more, and battery hours are estimates.
 
 ## Install
 
