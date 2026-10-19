@@ -1,0 +1,32 @@
+# Pilot Light
+
+> Pilot Light is a free, open source macOS menu bar app that keeps a MacBook awake with the lid closed while you are logged in, so AI coding agents (Claude Code, Codex and similar) keep working. When the lid closes it switches the Mac to Low Power Mode and turns the display off, and it restores your settings when the lid opens. Made by sudolabs.
+
+## What it does
+
+- Keeps the Mac awake with the lid closed, using the macOS system sleep setting (power assertions like `caffeinate` cannot override a lid close).
+- Switches to Low Power Mode when the lid closes and restores the exact battery and charger settings when it opens.
+- Turns the display off with the lid closed.
+- Only while you are logged in: log out or switch users and closing the lid sleeps the Mac as normal.
+- Safety cutoffs: with the lid closed, it lets the Mac sleep if macOS reports serious heat or the battery drops below a limit you choose (off, 10%, 15% or 20%).
+- Measures whole-Mac power draw on battery with the lid open and closed, and shows the average watts and estimated battery hours in its menu.
+- One admin prompt installs a helper that can change only the sleep and Low Power settings.
+
+## Measurements
+
+- On a MacBook Pro with M5 Max (macOS 26.6), unplugged, background apps only, no agent workload: 16.7 W with the lid open, 4.8 W with the lid closed after the first minute (about 3.5x less). Battery hours are estimates. Real agent work draws more.
+- The app itself: about 25 MB of memory (20–31 MB measured), about 0% CPU while waiting, 880 KB zipped download, one Swift file of 358 lines, no third-party code, no network requests.
+
+## Requirements and caveats
+
+- macOS 13 or later; universal app for Apple silicon and Intel. So far tested only on Apple silicon (M5 Max) with macOS 26.6.
+- Not notarized yet: on first launch, right-click the app and choose Open.
+- While it is on, the Mac also won't idle-sleep with the lid open (the display still turns off).
+
+## Links
+
+- [Website](https://pilotlight.sudolabs.nz/): overview, measurements and install steps
+- [Source code](https://github.com/CyrisXD/pilot-light): build with `./build.sh` (needs Xcode command line tools)
+- [Download the latest release](https://github.com/CyrisXD/pilot-light/releases/latest)
+- [Sponsor on GitHub](https://github.com/sponsors/CyrisXD)
+- [Buy Me a Coffee](https://buymeacoffee.com/FiRmVXOZh)

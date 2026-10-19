@@ -1,0 +1,8 @@
+.DS_Store
+# Local power measurements (list the apps running on the test Mac)
+logs/
+# Design tooling scratch
+.impeccable/
+PRODUCT.md
+# CLI caches
+.cloudflare/

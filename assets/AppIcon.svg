@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2942"/><stop offset="1" stop-color="#0A1120"/></linearGradient>
+<radialGradient id="glow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#FF7A2E" stop-opacity="0.38"/><stop offset="1" stop-color="#FF7A2E" stop-opacity="0"/></radialGradient>
+<linearGradient id="outer" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#F2541B"/><stop offset="1" stop-color="#FF9A3C"/></linearGradient>
+<linearGradient id="core" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FFC24A"/><stop offset="1" stop-color="#FFF0C4"/></linearGradient>
+</defs>
+<rect x="100" y="100" width="824" height="824" rx="185" fill="url(#bg)"/>
+<rect x="100.5" y="100.5" width="823" height="823" rx="184.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.08"/>
+<circle cx="512" cy="520" r="300" fill="url(#glow)"/>
+<path d="M512 260 C512 260 651 411 651 539 C651 620 588 690 512 690 C436 690 373 620 373 539 C373 411 512 260 512 260 Z" fill="url(#outer)"/>
+<path d="M512 360 C512 360 609 466 609 555 C609 611 565 668 512 668 C459 668 415 611 415 555 C415 466 512 360 512 360 Z" fill="#FFB547" fill-opacity="0.75"/>
+<path d="M512 458 C512 458 576 527 576 585 C576 626 547 655 512 655 C477 655 448 626 448 585 C448 527 512 458 512 458 Z" fill="url(#core)"/>
+<rect x="302" y="704" width="420" height="28" rx="14" fill="#C9D2E0"/>
+<rect x="342" y="736" width="340" height="8" rx="4" fill="#6E7C93"/>
+</svg>

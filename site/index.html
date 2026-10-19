@@ -1,0 +1,1046 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pilot Light for Mac: keep your MacBook awake with the lid closed</title>
+<meta name="description" content="Free, open source macOS menu bar app that keeps your MacBook awake with the lid closed so AI agents keep working, on under a third of the power.">
+<link rel="canonical" href="https://pilotlight.sudolabs.nz/">
+<meta name="theme-color" content="#05070C">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="assets/favicon-64.png">
+<link rel="apple-touch-icon" href="assets/icon-256.png">
+
+<!-- Sharing -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Pilot Light">
+<meta property="og:title" content="Pilot Light: 16.7 W → 4.8 W with the lid closed">
+<meta property="og:description" content="Close the lid and your MacBook drops from 16.7 W to 4.8 W while your AI agents keep working. Free, open source, under 1 MB.">
+<meta property="og:url" content="https://pilotlight.sudolabs.nz/">
+<meta property="og:image" content="https://pilotlight.sudolabs.nz/assets/share.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="16.7 watts with the lid open falls to 4.8 watts with it closed: about 6 hours of battery versus more than 20.">
+<meta property="og:locale" content="en_NZ">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pilot Light: 16.7 W → 4.8 W with the lid closed">
+<meta name="twitter:description" content="Close the lid and your MacBook drops from 16.7 W to 4.8 W while your AI agents keep working. Free, open source, under 1 MB.">
+<meta name="twitter:image" content="https://pilotlight.sudolabs.nz/assets/share.png">
+<meta name="twitter:image:alt" content="16.7 watts with the lid open falls to 4.8 watts with it closed: about 6 hours of battery versus more than 20.">
+
+<!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Pilot Light",
+  "alternateName": "Pilot Light for Mac",
+  "description": "Free, open source macOS menu bar app that keeps your MacBook awake with the lid closed so AI agents keep working, on under a third of the power.",
+  "url": "https://pilotlight.sudolabs.nz/",
+  "image": "https://pilotlight.sudolabs.nz/assets/share.png",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "macOS 13 or later",
+  "processorRequirements": "Apple silicon or Intel",
+  "fileSize": "880KB",
+  "downloadUrl": "https://github.com/CyrisXD/pilot-light/releases/latest",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Organization", "name": "sudolabs", "url": "https://sudolabs.nz" },
+  "sameAs": ["https://github.com/CyrisXD/pilot-light"]
+}
+</script>
+<style>
+/* Night desk: one pinned stage where a real-time 3D MacBook closes as you scroll, then calm sections on an 8px rhythm. */
+:root{
+  --ink:#05070C;
+  --night:#0A1020;
+  --text:#F2F4F8;
+  --muted:#A3ACBB;
+  --dim:#7A8392;
+  --rule:#1A2232;
+  --well:#0B111C;
+  --track:#111827;
+  --slate:#5C6F92;
+  --flame:#FF8A3D;
+  --flame-hover:#FFA25E;
+  --flame-soft:#FFB070;
+  --flame-ink:#1A0B02;
+  --menu-lit:#C2551B;
+
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Helvetica,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+
+  --t-display:clamp(44px,6.6vw,88px);
+  --t-h2:clamp(34px,4.6vw,64px);
+  --t-h3:clamp(24px,2.4vw,32px);
+  --t-lede:clamp(18px,1.4vw,21px);
+  --t-body:18px;
+  --t-small:15px;
+  --t-micro:13px;
+
+  --s1:8px;--s2:16px;--s3:24px;--s4:32px;--s5:48px;--s6:64px;--s7:96px;
+  --section:clamp(96px,14vh,160px);
+  --gutter:24px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  color-scheme:dark;
+}
+@media (max-width:520px){:root{--gutter:20px;--t-body:17px}}
+*{box-sizing:border-box}
+html{background:var(--ink);scrollbar-color:#2A3346 var(--ink)}
+body{margin:0;background:var(--ink);color:var(--text);font-family:var(--sans);font-size:var(--t-body);line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;caret-color:var(--flame)}
+::selection{background:var(--flame);color:var(--flame-ink)}
+a{color:var(--flame-soft);text-underline-offset:.2em}
+a:hover{color:#FFD2A8}
+:focus-visible{outline:2px solid var(--flame);outline-offset:4px;border-radius:6px}
+img,svg{display:block}
+h1,h2,h3,p{margin:0}
+h1,h2{font-weight:700;letter-spacing:-.03em;line-height:1.04;text-wrap:balance}
+h3{font-weight:700;letter-spacing:-.02em;line-height:1.15;text-wrap:balance}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(var(--gutter),env(safe-area-inset-left,0px));padding-right:max(var(--gutter),env(safe-area-inset-right,0px))}
+.section{padding-block:var(--section)}
+.rule{border-top:1px solid var(--rule)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.nw{white-space:nowrap}
+.accent{color:var(--flame)}
+.h2{font-size:var(--t-h2)}
+.lede{font-size:var(--t-lede);color:var(--muted);line-height:1.45;text-wrap:pretty}
+
+/* Local nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:rgba(5,7,12,.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
+.nav .wrap{display:flex;align-items:center;gap:var(--s4);height:52px}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto;color:var(--text);text-decoration:none;font-weight:600;font-size:19px;letter-spacing:-.01em}
+.brand img{width:28px;height:28px}
+.navlink{color:var(--muted);text-decoration:none;font-size:var(--t-micro)}
+.navlink:hover{color:var(--text)}
+.pill{display:inline-flex;align-items:center;height:32px;padding:0 var(--s2);border-radius:999px;background:var(--flame);color:var(--flame-ink);text-decoration:none;font-size:var(--t-micro);font-weight:600}
+.pill:hover{background:var(--flame-hover);color:var(--flame-ink)}
+@media (max-width:640px){.navlink{display:none}}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:0 var(--s3);border-radius:999px;background:var(--flame);color:var(--flame-ink);text-decoration:none;font-weight:600;font-size:17px;transition:background .3s var(--ease),transform .3s var(--ease)}
+.btn:hover{background:var(--flame-hover);color:var(--flame-ink);transform:translateY(-1px)}
+.textlink{display:inline-flex;align-items:center;gap:4px;min-height:44px;color:var(--flame-soft);text-decoration:none;font-size:17px}
+.textlink:hover{text-decoration:underline}
+.textlink .gh{margin-right:4px}
+.ghlink{display:inline-flex;align-items:center;gap:6px}
+
+/* The close: pinned stage */
+.close{position:relative;height:380vh}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
+.stage::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 45% at 50% 62%,rgba(76,120,210,calc(.20*var(--screen,1))) 0%,transparent 70%),radial-gradient(40% 36% at 50% 66%,rgba(255,122,46,calc(.30*var(--flameOn,0))) 0%,transparent 70%),linear-gradient(#05070C 0%,var(--night) 100%);pointer-events:none}
+#gl{position:absolute;left:0;right:0;top:var(--glTop,0px);bottom:var(--glBottom,0px);width:100%;height:calc(100% - var(--glTop,0px) - var(--glBottom,0px));display:block;pointer-events:none}
+.fallback{display:none;position:absolute;left:50%;top:52%;width:min(220px,40vw);transform:translate(-50%,-50%)}
+.no3d .fallback{display:block}
+
+.hero{position:absolute;top:0;left:0;right:0;z-index:2;padding:clamp(56px,10vh,112px) max(var(--gutter),env(safe-area-inset-left,0px)) 0;text-align:center;opacity:var(--heroO,1);transform:translateY(var(--heroY,0px));will-change:transform,opacity}
+.hero h1{margin:0 auto;max-width:13ch;font-size:var(--t-display)}
+.hero .lede{margin:var(--s3) auto 0;max-width:34em}
+.ctas{margin-top:var(--s4);display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:var(--s2) var(--s4)}
+.meta{margin:var(--s2) auto 0;max-width:40em;color:var(--dim);font-size:14px;text-wrap:balance}
+
+.captions{position:absolute;z-index:2;top:clamp(64px,10vh,104px);left:0;right:0;pointer-events:none}
+.cap{position:absolute;left:0;right:0;margin:0 auto;padding:0 var(--gutter);max-width:20ch;text-align:center;font-size:var(--t-h2);line-height:1.04;font-weight:700;letter-spacing:-.03em;text-wrap:balance;opacity:0;transform:translateY(24px);will-change:transform,opacity}
+.cap small{display:block;margin:var(--s2) auto 0;max-width:30em;font-size:var(--t-lede);font-weight:500;letter-spacing:0;color:var(--muted);line-height:1.4}
+.cap em{font-style:normal;color:var(--flame)}
+
+/* Live readout */
+.readout{position:absolute;z-index:2;left:0;right:0;bottom:max(var(--s4),env(safe-area-inset-bottom,0px));display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:var(--s1) var(--s5);padding:0 var(--gutter);opacity:var(--readO,0);transform:translateY(var(--readY,16px));will-change:opacity,transform}
+.watts{font-size:clamp(44px,5vw,72px);font-weight:700;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:var(--wattC,var(--text))}
+.watts small{font-size:.42em;font-weight:600;margin-left:.08em}
+.readout .what{order:3;width:100%;text-align:center;font-size:var(--t-micro);color:var(--muted)}
+.states{display:flex;gap:var(--s4);font-size:var(--t-micro);color:var(--muted)}
+.states b{display:block;color:var(--text);font-weight:600;font-size:16px;font-variant-numeric:tabular-nums}
+@media (max-width:520px){.readout{gap:var(--s1) var(--s3)}.states{gap:var(--s3)}}
+
+/* Hours */
+.hours .lede{margin-top:var(--s3);max-width:36em}
+.hours h2{max-width:18ch}
+.timeline{margin-top:var(--s6);display:grid;gap:var(--s4)}
+.track{display:grid;grid-template-columns:minmax(150px,220px) minmax(0,1fr);align-items:center;gap:var(--s3)}
+.track .name{font-size:var(--t-small);color:var(--muted)}
+.track .name b{display:block;color:var(--text);font-size:17px;font-weight:600}
+.meter{position:relative;height:14px;border-radius:7px;background:var(--track);overflow:hidden}
+.meter i{position:absolute;inset:0 auto 0 0;width:calc(var(--fill,0) * var(--to));border-radius:7px;background:var(--c)}
+.ticks{display:grid;grid-template-columns:minmax(150px,220px) minmax(0,1fr);gap:var(--s3);font-family:var(--mono);font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+.ticks div{display:flex;justify-content:space-between}
+@media (max-width:640px){.track,.ticks{grid-template-columns:minmax(0,1fr);gap:var(--s1)}.ticks>span{display:none}.timeline{gap:var(--s3)}}
+
+/* Positioning paragraph */
+.reveal{max-width:24ch;font-size:var(--t-h2);line-height:1.1;font-weight:700;letter-spacing:-.025em}
+.reveal .w{color:var(--dim);transition:color .5s var(--ease)}
+.reveal .w.on{color:var(--text)}
+.reveal .w.flame.on{color:var(--flame)}
+
+/* Features beside the real menu */
+.features{padding-block:var(--s5) var(--section)}
+.feat-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s6);align-items:start}
+.menu-col{position:sticky;top:calc(50vh - 240px)}
+.bigmenu{font-size:clamp(15px,1.3vw,17px);width:min(420px,100%);margin-left:auto;padding:6px;border-radius:14px;background:rgba(40,45,58,.72);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.12);box-shadow:0 30px 60px -20px rgba(0,0,0,.7);color:#EDF0F5}
+.bigmenu .row{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:7px;transition:background .45s var(--ease),color .45s var(--ease)}
+.bigmenu .row svg{width:13px;height:13px;flex:0 0 auto}
+.bigmenu .row .sp{width:13px;flex:0 0 auto}
+.bigmenu .row .chev{margin-left:auto;width:11px;height:11px;color:#A9B1BF}
+/* One highlight per feature: a single row, or the power rows lit together as one block. */
+.bigmenu .grp{border-radius:7px;transition:background .45s var(--ease)}
+.bigmenu .grp .row{background:none}
+.bigmenu .row.lit,.bigmenu .grp.lit{background:var(--menu-lit);color:#FFF5EC}
+.bigmenu .lit .chev,.bigmenu .lit .lbl,.bigmenu .lit.lbl{color:#FFE2CC}
+.bigmenu .sep{height:1px;margin:6px 12px;background:rgba(255,255,255,.12)}
+.bigmenu .lbl{color:#A9B1BF}
+.menu-cap{margin:var(--s2) 0 0 auto;width:min(420px,100%);font-size:var(--t-micro);color:var(--dim)}
+.feat{min-height:60vh;display:flex;flex-direction:column;justify-content:center;gap:var(--s2);opacity:.42;transition:opacity .6s var(--ease)}
+.feat.active,.feat:hover,.feat:focus-within{opacity:1}
+.feat h3{font-size:var(--t-h3)}
+.feat p{max-width:30em;color:var(--muted);text-wrap:pretty}
+@media (max-width:860px){
+  .feat-grid{grid-template-columns:minmax(0,1fr);gap:var(--s5)}
+  .menu-col{position:static}
+  .bigmenu{margin:0 auto;font-size:14px}
+  .bigmenu .row{white-space:normal}
+  .menu-cap{display:none}
+  .feat{min-height:0;opacity:1;padding-block:var(--s4)}
+}
+
+/* Specs */
+.specs h2,.install h2{margin-bottom:var(--s5)}
+.spec{display:grid;grid-template-columns:minmax(160px,260px) minmax(0,1fr);gap:var(--s3);padding-block:var(--s3);border-top:1px solid var(--rule)}
+.spec dt{color:var(--muted);font-size:17px}
+.spec dd{margin:0;font-size:21px;font-weight:600;letter-spacing:-.01em}
+.spec dd.big{font-size:clamp(36px,4vw,52px);font-weight:700;letter-spacing:-.03em;line-height:1.05;font-variant-numeric:tabular-nums}
+.spec dd.flamefig{color:var(--flame)}
+.spec dd span{display:block;margin-top:4px;color:var(--muted);font-size:var(--t-small);font-weight:400;letter-spacing:0}
+sup a{color:inherit;text-decoration:none;font-size:.5em;vertical-align:super;margin-left:.1em}
+.meta sup a{font-size:.75em;color:var(--flame-soft)}
+@media (max-width:640px){.spec{grid-template-columns:minmax(0,1fr);gap:4px}}
+
+/* Install */
+.install-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:var(--s6)}
+.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;gap:var(--s4)}
+.steps li{counter-increment:s;display:grid;grid-template-columns:36px minmax(0,1fr);gap:var(--s2)}
+.steps li::before{content:counter(s);width:36px;height:36px;border-radius:50%;border:1.5px solid var(--flame);color:var(--flame-soft);display:flex;align-items:center;justify-content:center;font-size:var(--t-small);font-weight:600;font-variant-numeric:tabular-nums}
+.steps b{display:block;font-size:19px;font-weight:600;line-height:1.3;padding-top:5px}
+.steps p{margin-top:4px;color:var(--muted);font-size:var(--t-small)}
+.code-h{margin:0 0 var(--s2);font-size:var(--t-small);color:var(--muted);font-weight:500}
+pre.code{margin:0;padding:var(--s3);background:var(--well);border:1px solid var(--rule);border-radius:14px;overflow-x:auto;font-family:var(--mono);font-size:14px;line-height:1.8;color:#DDE3EC}
+.note{margin-top:var(--s2);color:var(--muted);font-size:var(--t-small)}
+.install .btn{margin-top:var(--s5)}
+@media (max-width:860px){.install-grid{grid-template-columns:minmax(0,1fr);gap:var(--s5)}}
+
+/* Support development */
+.support{text-align:center;display:flex;flex-direction:column;align-items:center}
+.support-icon{width:72px;height:72px;margin-bottom:var(--s4)}
+.support h2{max-width:16ch}
+.support .lede{margin-top:var(--s3);max-width:34em}
+.support-ctas{margin-top:var(--s5);display:flex;flex-wrap:wrap;justify-content:center;gap:var(--s2)}
+.btn-quiet{background:transparent;color:var(--text);box-shadow:inset 0 0 0 1.5px #2C3850}
+.btn-quiet:hover{background:#121A2A;color:var(--text)}
+.support .note{margin-top:var(--s3);color:var(--dim)}
+
+/* Footnotes & footer */
+.foot{border-top:1px solid var(--rule);padding-block:var(--s5) var(--s6);color:var(--dim);font-size:var(--t-micro);line-height:1.6}
+.foot ol{margin:0 0 var(--s4);padding-left:18px;max-width:76em}
+.foot li{margin-bottom:var(--s1);color:#8A93A3}
+.foot .row{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);align-items:center}
+.foot .row span{margin-right:auto}
+.foot a{color:#B9C1CE}
+
+/* Fade-up for supporting copy */
+.up{opacity:0;transform:translateY(28px);transition:opacity 1s var(--ease),transform 1s var(--ease)}
+.up.in{opacity:1;transform:none}
+
+/* Reduce Motion: a calm static page */
+@media (prefers-reduced-motion:reduce){
+  .close{height:auto}
+  .stage{position:relative;height:auto;min-height:0;display:flex;flex-direction:column}
+  .hero{position:relative;opacity:1;transform:none}
+  .captions{display:none}
+  #gl{position:relative;top:auto;bottom:auto;height:62vh;margin-top:var(--s4)}
+  .readout{position:relative;bottom:auto;right:auto;left:auto;width:auto;opacity:1;transform:none;padding-bottom:var(--s5)}
+  .up{opacity:1;transform:none;transition:none}
+  .reveal .w{color:var(--text);transition:none}
+  .feat{opacity:1;transition:none}
+  .btn,.bigmenu .row{transition:none}
+}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="assets/icon-256.png" alt="" width="28" height="28">Pilot Light</a>
+    <a class="navlink" href="#why">Overview</a>
+    <a class="navlink" href="#features">Features</a>
+    <a class="navlink" href="#specs">Specs</a>
+    <a data-goatcounter-click="support-nav" class="navlink" href="#support">Support</a>
+    <a data-goatcounter-click="download-nav" class="pill" href="https://github.com/CyrisXD/pilot-light/releases/latest">Download</a>
+  </div>
+</header>
+
+<main id="top">
+
+<section class="close" id="close" aria-label="Pilot Light keeps your Mac awake with the lid closed">
+  <p class="sr">With one click on the flame in the menu bar, Pilot Light turns on. Close the lid and most Macs go to sleep; with Pilot Light the screen goes dark, Low Power Mode switches on and the Mac stays awake, so your agents keep working. Measured power falls from 16.7 watts with the lid open to 4.8 watts with it closed.</p>
+  <div class="stage">
+    <canvas id="gl" aria-hidden="true"></canvas>
+    <img class="fallback" src="assets/icon-256.png" alt="">
+
+    <div class="hero">
+      <h1>Lid shut. <span class="accent">Pilot light on.</span></h1>
+      <p class="lede">Close the lid and your MacBook burns down to a pilot light: dark, quiet and still working. Your agents keep going on under a third of the power<sup><a href="#fn1">1</a></sup>.</p>
+      <div class="ctas">
+        <a data-goatcounter-click="download-hero" class="btn" href="https://github.com/CyrisXD/pilot-light/releases/latest">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+          Download for macOS
+        </a>
+        <a data-goatcounter-click="source-hero" class="textlink" href="https://github.com/CyrisXD/pilot-light"><svg class="gh" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>Read the source</a>
+      </div>
+      <p class="meta"><span class="nw">Free and open source ·</span> <span class="nw">macOS 13 or later ·</span> <span class="nw">Universal app for Apple silicon and Intel<sup><a href="#fn2">2</a></sup></span></p>
+    </div>
+
+    <div class="captions" aria-hidden="true">
+      <p class="cap">Turn it on from the menu bar.<small>One click on the flame next to your clock.</small></p>
+      <p class="cap">Close the lid.<small>Most Macs go to sleep right here. This one doesn’t.</small></p>
+      <p class="cap">It burns down to a <em>pilot light</em>.<small>The display, the power mode and the sleep rules all change the moment the lid shuts.</small></p>
+      <p class="cap">Your agents keep working. <em>On 4.8 watts.</em><small>Open the lid and everything goes back how you left it.</small></p>
+    </div>
+
+    <div class="readout" aria-hidden="true">
+      <div class="watts"><span id="watts">16.7</span><small>W</small></div>
+      <div class="what">whole-Mac power draw<sup><a href="#fn1">1</a></sup></div>
+      <div class="states">
+        <div>Screen <b id="st-screen">On</b></div>
+        <div>Low Power <b id="st-lpm">Off</b></div>
+        <div>Agents <b>Running</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section hours wrap" aria-labelledby="hours-h">
+  <h2 class="h2 up" id="hours-h">About <span class="accent">3.5×</span> less power with the lid closed.<sup><a href="#fn1">1</a></sup></h2>
+  <p class="lede up">The same Mac with the same apps open: 16.7 watts with the lid up, 4.8 with it shut. That’s the difference between an evening of battery and a night and the next day.</p>
+  <div class="timeline" id="timeline">
+    <div class="track">
+      <div class="name"><b>Lid open</b>16.7 W · about 6 hours</div>
+      <div class="meter" role="img" aria-label="About 6 hours of battery"><i style="--to:25%;--c:var(--slate)"></i></div>
+    </div>
+    <div class="track">
+      <div class="name"><b class="accent">Lid closed, Pilot Light on</b>4.8 W · 20+ hours</div>
+      <div class="meter" role="img" aria-label="More than 20 hours of battery"><i style="--to:86%;--c:var(--flame)"></i></div>
+    </div>
+    <div class="ticks"><span></span><div><span>0 h</span><span>6 h</span><span>12 h</span><span>18 h</span><span>24 h</span></div></div>
+  </div>
+</section>
+
+<section class="section why wrap" id="why" aria-label="Why it’s different">
+  <p class="reveal" id="reveal">Apps built on power assertions stop idle sleep. But a MacBook still sleeps the moment its lid closes. Pilot Light uses the setting that keeps it awake, then <span class="flame">looks after the battery while it does.</span></p>
+</section>
+
+<section class="features wrap" id="features" aria-label="Features">
+  <div class="feat-grid">
+    <div class="menu-col">
+      <div class="bigmenu" aria-hidden="true">
+        <div class="row" data-k="admin"><span class="sp"></span>Install helper (admin)…</div>
+        <div class="row" data-k="awake"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8.5 3 3 7-7"/></svg>Keep awake when lid closed</div>
+        <div class="row" data-k="lpm"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8.5 3 3 7-7"/></svg>Low Power Mode when lid closed</div>
+        <div class="row"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8.5 3 3 7-7"/></svg>Launch at login</div>
+        <div class="row" data-k="cut"><span class="sp"></span>Sleep when battery below<svg class="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 2.5 3.5 3.5-3.5 3.5"/></svg></div>
+        <div class="sep"></div>
+        <div class="grp" data-k="power">
+          <div class="row lbl"><span class="sp"></span>Average power on battery</div>
+          <div class="row"><span class="sp"></span><span class="lbl">Lid open: 16.7 W · ~6 h battery</span></div>
+          <div class="row"><span class="sp"></span><span class="lbl">Lid closed: 4.8 W · ~21 h battery</span></div>
+        </div>
+        <div class="row"><span class="sp"></span>Reset power averages</div>
+        <div class="sep"></div>
+        <div class="row"><span class="sp"></span>Support</div>
+        <div class="row"><span class="sp"></span>Quit</div>
+      </div>
+      <p class="menu-cap">The Pilot Light menu, from the flame in your menu bar.</p>
+    </div>
+    <div class="feat-list">
+      <article class="feat" data-k="power">
+        <h3>It measures your Mac’s power draw.</h3>
+        <p>On battery, Pilot Light averages your whole Mac’s drain with the lid open and with it closed, and shows the hours of battery each works out to. You can see it working.</p>
+      </article>
+      <article class="feat" data-k="lpm">
+        <h3>Low Power Mode, then puts it back.</h3>
+        <p>It switches to Low Power the moment the lid closes, and restores your exact battery and charger settings when it opens.</p>
+      </article>
+      <article class="feat" data-k="awake">
+        <h3>Logs out? It sleeps.</h3>
+        <p>It keeps the Mac awake only while you’re logged in. Log out or switch users, and closing the lid puts the Mac to sleep as normal.</p>
+      </article>
+      <article class="feat" data-k="cut">
+        <h3>Heat and battery cutoffs.</h3>
+        <p>With the lid closed, if macOS reports serious heat or the battery drops below your limit, the Mac goes to sleep anyway.</p>
+      </article>
+      <article class="feat" data-k="admin">
+        <h3>One admin prompt, tightly scoped.</h3>
+        <p>The helper lets Pilot Light change only the sleep and Low Power settings, so it doesn’t need your password every time.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section specs wrap rule" id="specs" aria-labelledby="specs-h">
+  <h2 id="specs-h" class="h2 up">Specs and measurements.</h2>
+  <dl>
+    <div class="spec"><dt>Memory</dt><dd class="big flamefig">~25 MB<span>20–31 MB measured while running</span></dd></div>
+    <div class="spec"><dt>Download</dt><dd class="big">880 KB<span>The whole app, zipped, icon included</span></dd></div>
+    <div class="spec"><dt>CPU</dt><dd class="big">~0%<span>While waiting. It checks the lid and battery every 2 seconds and reads power every 30.</span></dd></div>
+    <div class="spec"><dt>Code</dt><dd>One Swift file, 358 lines<span>No third-party code, no network requests</span></dd></div>
+    <div class="spec"><dt>Requirements</dt><dd>macOS 13 or later<sup><a href="#fn2">2</a></sup><span>Apple silicon and Intel MacBooks</span></dd></div>
+    <div class="spec"><dt>Permissions</dt><dd>One admin prompt<span>Sleep and Low Power settings only</span></dd></div>
+  </dl>
+</section>
+
+<section class="section install wrap rule" id="install" aria-labelledby="install-h">
+  <h2 id="install-h" class="h2 up">Set up in a minute.</h2>
+  <div class="install-grid">
+    <div>
+      <ol class="steps">
+        <li><div><b>Download and drag to Applications.</b><p>It isn’t notarized yet, so the first time, right-click the app and choose Open.</p></div></li>
+        <li><div><b>Click the flame, then Install helper.</b><p>One admin prompt. The flame turns solid when Pilot Light is on.</p></div></li>
+        <li><div><b>Close the lid.</b><p>Screen off, Low Power on, and your agents keep running.</p></div></li>
+      </ol>
+      <a data-goatcounter-click="download-install" class="btn" href="https://github.com/CyrisXD/pilot-light/releases/latest"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Download for macOS</a>
+    </div>
+    <div>
+      <h3 class="code-h">Or build it from source</h3>
+<pre class="code"><code>git clone https://github.com/CyrisXD/pilot-light
+cd pilot-light
+./build.sh
+open ~/Applications/"Pilot Light.app"</code></pre>
+      <p class="note">Needs the Xcode command line tools. Builds a universal app for macOS 13 and later.</p>
+      <p class="note">While Pilot Light is on, your Mac won’t idle-sleep with the lid open either. The screen still turns off.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section support wrap rule" id="support" aria-labelledby="support-h">
+  <img class="support-icon up" src="assets/icon-256.png" alt="" width="72" height="72">
+  <h2 id="support-h" class="h2 up">Free. <span class="accent">Kept lit by people like you.</span></h2>
+  <p class="lede up">Pilot Light is free and open source, with no ads, no account and nothing phoning home. If it’s kept your agents running overnight, you can help fund the next update.</p>
+  <div class="support-ctas up">
+    <a data-goatcounter-click="support-github-sponsors" class="btn" href="https://github.com/sponsors/CyrisXD"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>Sponsor on GitHub</a>
+    <a data-goatcounter-click="support-buy-me-a-coffee" class="btn btn-quiet" href="https://buymeacoffee.com/FiRmVXOZh"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6h9v4a3.5 3.5 0 0 1-3.5 3.5H6A3.5 3.5 0 0 1 2.5 10V6Z"/><path d="M11.5 7h1a1.75 1.75 0 0 1 0 3.5h-1.2"/><path d="M5.5 1.75v2M8.5 1.75v2"/></svg>Buy me a coffee</a>
+  </div>
+  <p class="note">GitHub Sponsors uses your GitHub account. Buy Me a Coffee works without one.</p>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <ol>
+      <li id="fn1">Whole-Mac power draw measured on a MacBook Pro with M5 Max running macOS 26.6, unplugged, from the battery’s own telemetry. Two runs of about 10 minutes with the same background apps open and no agent workload; the lid-closed figure excludes the first minute while the display and power mode settle. Battery hours are estimates from the battery’s full-charge capacity. Real agent work draws more. Pilot Light measures your own Mac’s numbers in its menu.</li>
+      <li id="fn2">So far tested only on Apple silicon (M5 Max) with macOS 26.6. On macOS 13, the menu bar icon may fall back to the system flame symbol.</li>
+    </ol>
+    <div class="row">
+      <span>Pilot Light is made by <a href="https://sudolabs.nz">sudolabs</a>. Open source under the <a href="https://github.com/CyrisXD/pilot-light/blob/main/LICENSE">MIT license</a>. The MacBook shown is an illustration drawn in real time, not a photo. Visits are counted with GoatCounter: no cookies, nothing personal.</span>
+      <a data-goatcounter-click="source-footer" class="ghlink" href="https://github.com/CyrisXD/pilot-light"><svg class="gh" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>GitHub</a>
+      <a data-goatcounter-click="support-footer" href="#support">Support development</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Page choreography: computes scroll progress through the pinned stage and drives the copy.
+// The 3D MacBook (module below) reads window.plP.
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const seg = (p, a, b) => clamp((p - a) / (b - a));
+  const ease = t => 1 - Math.pow(1 - t, 3);
+  const lerp = (a, b, t) => a + (b - a) * t;
+
+  const close = document.getElementById('close');
+  const stage = close.querySelector('.stage');
+  const caps = [...close.querySelectorAll('.cap')];
+  const watts = document.getElementById('watts');
+  const stScreen = document.getElementById('st-screen');
+  const stLpm = document.getElementById('st-lpm');
+  const timeline = document.getElementById('timeline');
+  const reveal = document.getElementById('reveal');
+
+  const words = [];
+  const split = (node, flame) => {
+    [...node.childNodes].forEach(n => {
+      if (n.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach(t => {
+          if (!t) return;
+          if (/^\s+$/.test(t)) { frag.append(t); return; }
+          const s = document.createElement('span');
+          s.className = 'w' + (flame ? ' flame' : '');
+          s.textContent = t;
+          words.push(s);
+          frag.append(s);
+        });
+        n.replaceWith(frag);
+      } else if (n.nodeType === 1) split(n, flame || n.classList.contains('flame'));
+    });
+  };
+  split(reveal, false);
+
+  // Timeline (fractions of the pinned scroll): cursor clicks the flame .12–.34,
+  // lid closes .40–.72, watts fall .44–.76, flame lights .74–.84.
+  const windows = [[.13, .34], [.37, .52], [.54, .72], [.76, 1.01]];
+
+  window.plP = reduce ? .30 : 0;
+  if (reduce) {
+    stage.style.setProperty('--readO', 1);
+    stage.style.setProperty('--readY', '0px');
+    timeline.style.setProperty('--fill', 1);
+    document.querySelectorAll('.up').forEach(e => e.classList.add('in'));
+    words.forEach(w => w.classList.add('on'));
+  }
+
+  const render = () => {
+    const r = close.getBoundingClientRect();
+    const span = close.offsetHeight - innerHeight;
+    const p = clamp(-r.top / span);
+    window.plP = p;
+    window.dispatchEvent(new Event('plp'));
+
+    const out = ease(seg(p, 0, .1));
+    stage.style.setProperty('--heroO', 1 - out);
+    stage.style.setProperty('--heroY', (-60 * out) + 'px');
+
+    const screen = 1 - seg(p, .44, .56);
+    stage.style.setProperty('--screen', screen);
+    stage.style.setProperty('--flameOn', ease(seg(p, .74, .84)));
+
+    const read = ease(seg(p, .1, .18));
+    stage.style.setProperty('--readO', read);
+    stage.style.setProperty('--readY', (16 * (1 - read)) + 'px');
+
+    const fall = ease(seg(p, .44, .76));
+    watts.textContent = lerp(16.7, 4.8, fall).toFixed(1);
+    stage.style.setProperty('--wattC', fall > .98 ? 'var(--flame)' : 'var(--text)');
+    stScreen.textContent = screen < .5 ? 'Off' : 'On';
+    stLpm.textContent = p > .5 ? 'On' : 'Off';
+
+    caps.forEach((c, i) => {
+      const [a, b] = windows[i];
+      const inn = ease(seg(p, a, a + .05));
+      const o = i === caps.length - 1 ? 0 : ease(seg(p, b - .05, b));
+      c.style.opacity = inn * (1 - o);
+      c.style.transform = `translateY(${(1 - inn) * 24 - o * 24}px)`;
+    });
+
+    const t = timeline.getBoundingClientRect();
+    timeline.style.setProperty('--fill', ease(seg(innerHeight - t.top, innerHeight * .1, innerHeight * .7)));
+
+    const rr = reveal.getBoundingClientRect();
+    const k = seg(innerHeight * .78 - rr.top, 0, rr.height + innerHeight * .25);
+    const lit = Math.round(k * words.length);
+    words.forEach((el, i) => el.classList.toggle('on', i < lit));
+  };
+
+  // Give the 3D view its own band: below the tallest caption, above the readout (when it sits underneath).
+  const readout = stage.querySelector('.readout');
+  const layoutBand = () => {
+    if (reduce) return;
+    const capTop = stage.querySelector('.captions').offsetTop;
+    const capH = Math.max(...caps.map(c => c.offsetHeight));
+    stage.style.setProperty('--glTop', (capTop + capH + 8) + 'px');
+    const side = false; // readout always sits in its own row under the Mac
+    const glBottom = side ? 0 : stage.clientHeight - readout.offsetTop + 8;
+    stage.style.setProperty('--glBottom', glBottom + 'px');
+  };
+
+
+  let queued = false;
+  const onScroll = () => { if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; render(); }); } };
+  if (!reduce) {
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', () => { layoutBand(); onScroll(); });
+    layoutBand();
+    render();
+  }
+
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }), { rootMargin: '0px 0px -12% 0px' });
+  document.querySelectorAll('.up').forEach(e => io.observe(e));
+
+  const rows = [...document.querySelectorAll('.bigmenu [data-k]')];
+  const feats = [...document.querySelectorAll('.feat')];
+  const fio = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    const k = e.target.dataset.k;
+    feats.forEach(f => f.classList.toggle('active', f === e.target));
+    rows.forEach(r => r.classList.toggle('lit', r.dataset.k === k));
+  }), { rootMargin: '-45% 0px -45% 0px' });
+  feats.forEach(f => fio.observe(f));
+})();
+</script>
+
+<script type="module">
+// Real-time MacBook Pro 14" (space black) in centimetres, lit by a studio environment.
+// The screen is a canvas texture: menu bar, terminal, and a cursor that clicks the Pilot Light flame.
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+const canvas = document.getElementById('gl');
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+} catch (e) {
+  document.documentElement.classList.add('no3d');
+  throw e;
+}
+renderer.setPixelRatio(Math.min(2, devicePixelRatio));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), .04).texture;
+const camera = new THREE.PerspectiveCamera(30, 1, .5, 600);
+
+// ---------- helpers ----------
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const seg = (p, a, b) => clamp((p - a) / (b - a));
+const smooth = t => t * t * (3 - 2 * t);
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+const lerp = (a, b, t) => a + (b - a) * t;
+
+function roundedRect(w, h, r) {
+  const s = new THREE.Shape(), x = -w / 2, y = -h / 2;
+  s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
+  s.lineTo(x + w, y + h - r); s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r);
+  s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
+  return s;
+}
+// A slab lying flat: width along x, depth along z, thickness along y from 0 up.
+function slab(w, d, t, r, bevel) {
+  const g = new THREE.ExtrudeGeometry(roundedRect(w - bevel * 2, d - bevel * 2, r), {
+    depth: t - bevel * 2, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 5, curveSegments: 24
+  });
+  g.rotateX(-Math.PI / 2);
+  g.translate(0, bevel, 0);
+  g.computeVertexNormals();
+  return g;
+}
+// A flat rounded panel facing up (+y) or down.
+function panel(w, d, r, faceDown) {
+  const g = new THREE.ShapeGeometry(roundedRect(w, d, r), 24);
+  g.rotateX(faceDown ? Math.PI / 2 : -Math.PI / 2);
+  return g;
+}
+
+// ---------- materials ----------
+const alu = new THREE.MeshStandardMaterial({ color: 0x2b2d31, metalness: .7, roughness: .42, envMapIntensity: .55 });
+const aluSoft = new THREE.MeshStandardMaterial({ color: 0x2f3236, metalness: .55, roughness: .3, envMapIntensity: .5 });
+const wellMat = new THREE.MeshStandardMaterial({ color: 0x0b0b0d, metalness: .1, roughness: .7 });
+const keyMat = new THREE.MeshStandardMaterial({ color: 0x111113, metalness: .05, roughness: .55 });
+// Bezel glass: a soft sheen only; a mirror finish catches the studio light as a bright bar under the screen.
+const glass = new THREE.MeshPhysicalMaterial({ color: 0x050506, metalness: 0, roughness: .3, clearcoat: .35, clearcoatRoughness: .25, envMapIntensity: .2 });
+const hingeMat = new THREE.MeshStandardMaterial({ color: 0x16171a, metalness: .5, roughness: .45 });
+
+// Speaker grille: a fine dot pattern.
+function grilleTexture() {
+  const c = document.createElement('canvas'); c.width = 64; c.height = 64;
+  const x = c.getContext('2d');
+  x.fillStyle = '#2b2d31'; x.fillRect(0, 0, 64, 64);
+  x.fillStyle = '#0c0c0e';
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { x.beginPath(); x.arc(8 + i * 16, 8 + j * 16, 3.2, 0, 7); x.fill(); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+// ---------- geometry (MacBook Pro 14": 31.26 × 22.12 cm) ----------
+const W = 31.26, D = 22.12, BASE_T = 1.0, LID_T = .55, HINGE_Z = -D / 2;
+const mac = new THREE.Group();
+scene.add(mac);
+
+const base = new THREE.Mesh(slab(W, D, BASE_T, 1.05, .22), alu);
+base.castShadow = true; base.receiveShadow = true;
+mac.add(base);
+
+// Keyboard well, keys, speakers, trackpad on the top deck.
+const KB_W = 27.2, KB_D = 10.5, KB_Z = HINGE_Z + 1.15 + KB_D / 2;
+const well = new THREE.Mesh(panel(KB_W, KB_D, .5), wellMat);
+well.position.set(0, BASE_T + .003, KB_Z);
+mac.add(well);
+
+const rows = [
+  { d: .82, keys: [1.5, ...Array(12).fill(1), 1] },
+  { d: 1.62, keys: [...Array(13).fill(1), 1.5] },
+  { d: 1.62, keys: [1.5, ...Array(13).fill(1)] },
+  { d: 1.62, keys: [1.8, ...Array(11).fill(1), 1.7] },
+  { d: 1.62, keys: [2.3, ...Array(10).fill(1), 2.2] },
+  { d: 1.62, keys: [1, 1, 1, 1.25, 5, 1.25, 1, 1, 1, 1] }
+];
+const U = (KB_W - .9) / 14.5, GAP = .2;
+const keyGeo = new RoundedBoxGeometry(1, 1, 1, 2, .16);
+const keyCount = rows.reduce((n, r) => n + r.keys.length, 0);
+const keys = new THREE.InstancedMesh(keyGeo, keyMat, keyCount);
+keys.receiveShadow = true;
+{
+  const m = new THREE.Matrix4(); let i = 0;
+  let z = KB_Z - KB_D / 2 + .3;
+  for (const row of rows) {
+    let x = -KB_W / 2 + .45;
+    for (const w of row.keys) {
+      const kw = w * U - GAP, kd = row.d - GAP;
+      m.compose(new THREE.Vector3(x + kw / 2 + GAP / 2, BASE_T + .07, z + kd / 2 + GAP / 2), new THREE.Quaternion(), new THREE.Vector3(kw, .12, kd));
+      keys.setMatrixAt(i++, m);
+      x += w * U;
+    }
+    z += row.d;
+  }
+}
+mac.add(keys);
+
+const gTex = grilleTexture();
+for (const side of [-1, 1]) {
+  const t = gTex.clone(); t.needsUpdate = true; t.repeat.set(1.6, 22);
+  const sp = new THREE.Mesh(panel(.95, KB_D, .2), new THREE.MeshStandardMaterial({ map: t, metalness: .5, roughness: .5 }));
+  sp.position.set(side * (KB_W / 2 + .95), BASE_T + .002, KB_Z);
+  mac.add(sp);
+}
+
+const TP_W = 15.4, TP_D = 8.6, TP_Z = D / 2 - 1.05 - TP_D / 2;
+const pad = new THREE.Mesh(panel(TP_W, TP_D, .55), aluSoft);
+pad.position.set(0, BASE_T + .002, TP_Z);
+mac.add(pad);
+
+const hinge = new THREE.Mesh(new THREE.CylinderGeometry(.42, .42, W - 5, 32), hingeMat);
+hinge.rotation.z = Math.PI / 2;
+hinge.position.set(0, BASE_T - .18, HINGE_Z + .32);
+mac.add(hinge);
+
+// Lid pivots on the hinge line; rotation.x = 0 is closed, flat on the deck.
+const lid = new THREE.Group();
+lid.position.set(0, BASE_T, HINGE_Z);
+mac.add(lid);
+const lidShell = new THREE.Mesh(slab(W, D, LID_T, 1.05, .18), alu);
+lidShell.position.set(0, 0, D / 2);
+lidShell.castShadow = true;
+lid.add(lidShell);
+
+const bezel = new THREE.Mesh(panel(W - .3, D - .3, .9, true), glass);
+bezel.position.set(0, -.03, D / 2); // clear of the shell so it never z-fights into a grey chin
+lid.add(bezel);
+
+// Screen: 3024 × 1964 panel, drawn at half resolution.
+const SC_W = W - 1.36, SC_H = SC_W * 1964 / 3024, CHIN = D - .72 - SC_H;
+const sc = document.createElement('canvas'); sc.width = 1512; sc.height = 982;
+const sx = sc.getContext('2d');
+const screenTex = new THREE.CanvasTexture(sc);
+screenTex.colorSpace = THREE.SRGBColorSpace;
+screenTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+const screenMat = new THREE.MeshBasicMaterial({ map: screenTex, toneMapped: false });
+const screenGeo = new THREE.PlaneGeometry(SC_W, SC_H);
+screenGeo.rotateX(Math.PI / 2); // face -y (toward the keyboard when closed); image top sits at the lid's far edge
+const screen = new THREE.Mesh(screenGeo, screenMat);
+screen.position.set(0, -.045, CHIN + SC_H / 2);
+lid.add(screen);
+
+// Pilot flame emblem on the lid's back, with a real light for its glow.
+const fc = document.createElement('canvas'); fc.width = 128; fc.height = 160;
+{
+  const x = fc.getContext('2d');
+  const g = x.createLinearGradient(0, 160, 0, 0); g.addColorStop(0, '#F2541B'); g.addColorStop(1, '#FF9A3C');
+  x.fillStyle = g;
+  x.beginPath(); x.moveTo(64, 6); x.bezierCurveTo(64, 6, 118, 62, 118, 102); x.bezierCurveTo(118, 132, 94, 154, 64, 154); x.bezierCurveTo(34, 154, 10, 132, 10, 102); x.bezierCurveTo(10, 62, 64, 6, 64, 6); x.fill();
+  const c = x.createLinearGradient(0, 150, 0, 70); c.addColorStop(0, '#FFC24A'); c.addColorStop(1, '#FFF0C4');
+  x.fillStyle = c;
+  x.beginPath(); x.moveTo(64, 70); x.bezierCurveTo(64, 70, 92, 100, 92, 118); x.bezierCurveTo(92, 134, 80, 146, 64, 146); x.bezierCurveTo(48, 146, 36, 134, 36, 118); x.bezierCurveTo(36, 100, 64, 70, 64, 70); x.fill();
+}
+const flameTex = new THREE.CanvasTexture(fc); flameTex.colorSpace = THREE.SRGBColorSpace;
+const flameMat = new THREE.MeshBasicMaterial({ map: flameTex, transparent: true, opacity: 0, toneMapped: false, depthWrite: false });
+const flameGeo = new THREE.PlaneGeometry(2.4, 3.0); flameGeo.rotateX(-Math.PI / 2); flameGeo.rotateY(Math.PI);
+const emblem = new THREE.Mesh(flameGeo, flameMat);
+emblem.position.set(0, LID_T + .01, D / 2);
+lid.add(emblem);
+const glow = new THREE.PointLight(0xff7a2e, 0, 22, 2);
+glow.position.set(0, LID_T + 2.4, D / 2);
+lid.add(glow);
+
+// Studio light and a shadow-catching floor.
+scene.add(new THREE.HemisphereLight(0xbfd2ff, 0x0a0d14, .35));
+const key = new THREE.DirectionalLight(0xffffff, 1.6);
+key.position.set(-14, 34, 22);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.left = -30; key.shadow.camera.right = 30; key.shadow.camera.top = 30; key.shadow.camera.bottom = -30;
+key.shadow.camera.near = 1; key.shadow.camera.far = 90;
+key.shadow.bias = -.0004; key.shadow.radius = 6;
+scene.add(key);
+const rim = new THREE.DirectionalLight(0x8fb4ff, .9);
+rim.position.set(16, 18, -30);
+scene.add(rim);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.ShadowMaterial({ opacity: .55 }));
+floor.rotation.x = -Math.PI / 2; floor.position.y = -.01; floor.receiveShadow = true;
+scene.add(floor);
+
+// ---------- screen drawing ----------
+const MB = 44; // menu bar height in canvas px
+const FLAME = { x: 1512 - 286, y: MB / 2 };
+const MENU = { x: 1512 - 560, y: MB + 6, w: 470, row: 42 };
+const MENU_ROWS = [
+  { t: 'Keep awake when lid closed', check: 'awake' },
+  { t: 'Low Power Mode when lid closed', check: true },
+  { t: 'Launch at login', check: true },
+  { t: 'Sleep when battery below', chev: true },
+  { sep: true },
+  { t: 'Average power on battery', dim: true },
+  { t: 'Lid open: 16.7 W · ~6 h battery', dim: true },
+  { t: 'Lid closed: 4.8 W · ~21 h battery', warm: true },
+  { sep: true },
+  { t: 'Quit' }
+];
+function menuRowY(i) { let y = MENU.y + 8; for (let k = 0; k < i; k++) y += MENU_ROWS[k].sep ? 14 : MENU.row; return y; }
+const AWAKE_Y = menuRowY(0) + MENU.row / 2;
+
+function flamePath(x, cx, cy, s) {
+  x.beginPath();
+  x.moveTo(cx, cy - 7.25 * s);
+  x.bezierCurveTo(cx, cy - 7.25 * s, cx + 4.25 * s, cy - 2.9 * s, cx + 4.25 * s, cy + .9 * s);
+  x.bezierCurveTo(cx + 4.25 * s, cy + 3.35 * s, cx + 2.35 * s, cy + 5.25 * s, cx, cy + 5.25 * s);
+  x.bezierCurveTo(cx - 2.35 * s, cy + 5.25 * s, cx - 4.25 * s, cy + 3.35 * s, cx - 4.25 * s, cy + .9 * s);
+  x.bezierCurveTo(cx - 4.25 * s, cy - 2.9 * s, cx, cy - 7.25 * s, cx, cy - 7.25 * s);
+  x.closePath();
+}
+function rr(x, X, Y, w, h, r) { x.beginPath(); x.roundRect(X, Y, w, h, r); }
+
+let lastKey = '';
+function drawScreen(s) {
+  const k = [s.cx | 0, s.cy | 0, s.menu, s.on, s.hover, (s.ripple * 10) | 0, s.cursor].join();
+  if (k === lastKey) return;
+  lastKey = k;
+  const x = sx;
+  // Wallpaper
+  let g = x.createLinearGradient(0, 0, 1512, 982);
+  g.addColorStop(0, '#1a2a52'); g.addColorStop(.55, '#0e1730'); g.addColorStop(1, '#241731');
+  x.fillStyle = g; x.fillRect(0, 0, 1512, 982);
+  g = x.createRadialGradient(1150, 1050, 40, 1150, 1050, 760);
+  g.addColorStop(0, 'rgba(232,112,58,.85)'); g.addColorStop(1, 'rgba(232,112,58,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 1512, 982);
+  g = x.createRadialGradient(240, -80, 40, 240, -80, 700);
+  g.addColorStop(0, 'rgba(70,110,200,.7)'); g.addColorStop(1, 'rgba(70,110,200,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 1512, 982);
+
+  // Terminal window
+  x.save();
+  x.shadowColor = 'rgba(0,0,0,.55)'; x.shadowBlur = 50; x.shadowOffsetY = 20;
+  rr(x, 96, 120, 820, 600, 18); x.fillStyle = 'rgba(14,16,22,.94)'; x.fill();
+  x.restore();
+  rr(x, 96, 120, 820, 600, 18); x.strokeStyle = 'rgba(255,255,255,.1)'; x.lineWidth = 1.5; x.stroke();
+  ['#ff5f57', '#febc2e', '#28c840'].forEach((c, i) => { x.fillStyle = c; x.beginPath(); x.arc(126 + i * 26, 146, 8, 0, 7); x.fill(); });
+  x.fillStyle = '#8a93a3'; x.font = '500 19px -apple-system, "SF Pro Text", Helvetica, sans-serif'; x.textAlign = 'center';
+  x.fillText('agent — zsh', 506, 153);
+  x.fillStyle = 'rgba(255,255,255,.06)'; x.fillRect(96, 172, 820, 1.5);
+  x.textAlign = 'left'; x.font = '22px ui-monospace, "SF Mono", Menlo, monospace';
+  const lines = [
+    [['#7c8597', '~/code/api '], ['#ffb070', '› '], ['#d8dee8', 'agent run "migrate billing tests"']],
+    [['#7fd1a0', '✓ '], ['#d8dee8', 'read 38 files']],
+    [['#7fd1a0', '✓ '], ['#d8dee8', 'rewrote 12 test suites']],
+    [['#7c8597', '… '], ['#d8dee8', 'running tests  212 / 340']],
+    [['#7c8597', '… '], ['#d8dee8', 'will open a pull request when green']]
+  ];
+  lines.forEach((ln, i) => { let X = 128; ln.forEach(([c, t]) => { x.fillStyle = c; x.fillText(t, X, 222 + i * 40); X += x.measureText(t).width; }); });
+  x.fillStyle = '#d8dee8'; x.fillRect(128, 222 + 5 * 40 - 18, 12, 24);
+
+  // Menu bar (translucent) and notch
+  x.fillStyle = 'rgba(16,20,32,.55)'; x.fillRect(0, 0, 1512, MB);
+  x.fillStyle = '#eef1f6'; x.font = '600 21px -apple-system, "SF Pro Text", Helvetica, sans-serif';
+  x.fillText('Terminal', 64, 30);
+  x.font = '400 21px -apple-system, "SF Pro Text", Helvetica, sans-serif';
+  ['Shell', 'Edit', 'View', 'Window', 'Help'].reduce((X, t) => { x.fillText(t, X, 30); return X + x.measureText(t).width + 30; }, 176);
+  x.textAlign = 'right'; x.fillText('Tue 11:48 PM', 1512 - 30, 30); x.textAlign = 'left';
+  x.strokeStyle = '#eef1f6'; x.lineWidth = 2;
+  rr(x, 1512 - 236, 15, 34, 15, 4); x.stroke(); x.fillStyle = '#eef1f6'; x.fillRect(1512 - 233, 18, 20, 9);
+  x.fillStyle = '#000'; rr(x, 756 - 100, -10, 200, MB + 10, 16); x.fill();
+  // Pilot Light flame in the menu bar
+  if (s.menu) { x.fillStyle = 'rgba(255,255,255,.22)'; rr(x, FLAME.x - 18, 5, 36, 34, 7); x.fill(); }
+  flamePath(x, FLAME.x, FLAME.y + 1, 2);
+  if (s.on) {
+    x.fillStyle = '#eef1f6'; x.fill();
+    x.fillStyle = s.menu ? '#4e5462' : '#1e2434';
+    flamePath(x, FLAME.x, FLAME.y + 6, .9); x.fill();
+  } else { x.strokeStyle = '#eef1f6'; x.lineWidth = 2.6; x.stroke(); }
+
+  // Pilot Light menu
+  if (s.menu) {
+    let h = 16; MENU_ROWS.forEach(r => h += r.sep ? 14 : MENU.row);
+    x.save(); x.shadowColor = 'rgba(0,0,0,.5)'; x.shadowBlur = 40; x.shadowOffsetY = 16;
+    rr(x, MENU.x, MENU.y, MENU.w, h, 14); x.fillStyle = 'rgba(40,44,56,.94)'; x.fill(); x.restore();
+    rr(x, MENU.x, MENU.y, MENU.w, h, 14); x.strokeStyle = 'rgba(255,255,255,.14)'; x.lineWidth = 1.5; x.stroke();
+    x.font = '400 20px -apple-system, "SF Pro Text", Helvetica, sans-serif';
+    MENU_ROWS.forEach((r, i) => {
+      const Y = menuRowY(i);
+      if (r.sep) { x.fillStyle = 'rgba(255,255,255,.12)'; x.fillRect(MENU.x + 18, Y + 6, MENU.w - 36, 1.5); return; }
+      if (s.hover === i) { x.fillStyle = '#2f6fe0'; rr(x, MENU.x + 8, Y, MENU.w - 16, MENU.row, 8); x.fill(); }
+      x.fillStyle = r.dim ? '#a9b1bf' : r.warm ? '#ffc08a' : '#edf0f5';
+      if (s.hover === i) x.fillStyle = '#fff';
+      x.fillText(r.t, MENU.x + 52, Y + 28);
+      const checked = r.check === 'awake' ? s.on : r.check;
+      if (checked) { x.strokeStyle = x.fillStyle; x.lineWidth = 2.6; x.beginPath(); x.moveTo(MENU.x + 24, Y + 21); x.lineTo(MENU.x + 30, Y + 27); x.lineTo(MENU.x + 40, Y + 15); x.stroke(); }
+      if (r.chev) { x.strokeStyle = '#a9b1bf'; x.lineWidth = 2.4; x.beginPath(); x.moveTo(MENU.x + MENU.w - 34, Y + 14); x.lineTo(MENU.x + MENU.w - 27, Y + 21); x.lineTo(MENU.x + MENU.w - 34, Y + 28); x.stroke(); }
+    });
+  }
+
+  // Click ripple and cursor
+  if (s.ripple > 0) {
+    x.strokeStyle = `rgba(255,255,255,${.6 * (1 - s.ripple)})`; x.lineWidth = 3;
+    x.beginPath(); x.arc(s.cx, s.cy, 8 + 26 * s.ripple, 0, 7); x.stroke();
+  }
+  if (s.cursor) {
+    x.save(); x.translate(s.cx, s.cy); x.scale(1.5, 1.5);
+    x.beginPath(); x.moveTo(0, 0); x.lineTo(0, 22); x.lineTo(5.2, 17); x.lineTo(9, 25.5); x.lineTo(12.4, 24); x.lineTo(8.7, 15.8); x.lineTo(15.6, 15.8); x.closePath();
+    x.fillStyle = '#000'; x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 1.6; x.stroke();
+    x.restore();
+  }
+  screenTex.needsUpdate = true;
+}
+
+// ---------- choreography ----------
+// Camera keyframes [p, position, target]; portrait screens pull back to fit the width.
+const KEYS = [
+  [0, [0, 13, 64], [0, 11, -6]],
+  [.12, [0, 14, 62], [0, 11, -6]],
+  [.2, [0, 12.5, 45], [0, 9, -8]],
+  [.33, [0, 12.5, 45], [0, 9, -8]],
+  [.42, [0, 15, 62], [0, 9, -4]],
+  [.7, [0, 34, 52], [0, 1, 0]],
+  [1, [0, 44, 50], [0, 0, 1]]
+];
+function cameraAt(p) {
+  let i = 0; while (i < KEYS.length - 2 && p > KEYS[i + 1][0]) i++;
+  const [p0, a0, b0] = KEYS[i], [p1, a1, b1] = KEYS[i + 1];
+  const t = smooth(seg(p, p0, p1));
+  return { pos: a0.map((v, j) => lerp(v, a1[j], t)), tgt: b0.map((v, j) => lerp(v, b1[j], t)) };
+}
+
+const v3 = new THREE.Vector3(), lidTip = new THREE.Vector3(), tmp = new THREE.Vector3();
+// Outer corners of the base and lid, used to centre the Mac in its band.
+const BOUNDS = [
+  [mac, [-1, 1].flatMap(sx => [-1, 1].flatMap(sz => [0, BASE_T].map(y => new THREE.Vector3(sx * W / 2, y, sz * D / 2))))],
+  [lid, [-1, 1].flatMap(sx => [[0, 0], [LID_T, D], [0, D]].map(([y, z]) => new THREE.Vector3(sx * W / 2, y, z)))]
+];
+const heroEl = document.querySelector('.hero');
+function frame() {
+  const p = window.plP || 0;
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (!w || !h) return;
+  const pr = renderer.getPixelRatio();
+  if (canvas.width !== Math.round(w * pr) || canvas.height !== Math.round(h * pr)) renderer.setSize(w, h, false);
+  const aspect = w / h;
+  camera.aspect = aspect;
+  // Tall screens pull back to fit the Mac's width. On wide screens the opening shot comes in closer
+  // so the Mac carries the first viewport, then eases back to the full machine as the hero fades.
+  const fitBase = clamp(1.55 / aspect, 1, 2.3);
+  const fit = lerp(Math.min(fitBase, clamp(1.55 / aspect, .78, 2.3)), fitBase, smooth(seg(p, 0, .12)));
+  const c = cameraAt(p);
+  v3.set(...c.tgt);
+  camera.position.set(c.tgt[0] + (c.pos[0] - c.tgt[0]) * fit, c.tgt[1] + (c.pos[1] - c.tgt[1]) * fit, c.tgt[2] + (c.pos[2] - c.tgt[2]) * fit);
+  if (aspect < 1) v3.y -= 3 * (1 - aspect);
+  camera.lookAt(v3);
+  camera.updateProjectionMatrix();
+  camera.updateMatrixWorld();
+
+  // At the top of the page, sit the Mac's lid just under the hero copy (the rest runs off the fold),
+  // then let it rise into its band as the hero fades.
+  const rise = smooth(seg(p, 0, .12));
+  let shift = 0;
+  if (rise < 1 && heroEl) {
+    lid.rotation.x = -THREE.MathUtils.degToRad(112);
+    mac.updateMatrixWorld(true);
+    lidTip.set(0, LID_T, D).applyMatrix4(lid.matrixWorld).project(camera);
+    const tipY = canvas.offsetTop + (1 - lidTip.y) / 2 * h;
+    shift = Math.max(0, heroEl.offsetTop + heroEl.offsetHeight + 56 - tipY) * (1 - rise);
+  }
+  canvas.style.transform = shift ? `translateY(${shift}px)` : '';
+
+  // Lid: open at 112°, closes over .40–.72.
+  const shut = easeOut(seg(p, .4, .72));
+  lid.rotation.x = -THREE.MathUtils.degToRad(lerp(112, .15, shut));
+  screenMat.color.setScalar(1 - seg(p, .44, .56));
+
+  // Cursor: terminal → flame (click) → "Keep awake" (click) → away (menu closes).
+  const START = [620, 560], AWAY = [1060, 640];
+  const toFlame = smooth(seg(p, .12, .2));
+  const toRow = smooth(seg(p, .235, .29));
+  const toAway = smooth(seg(p, .31, .36));
+  let cx = lerp(START[0], FLAME.x, toFlame), cy = lerp(START[1], FLAME.y, toFlame);
+  if (p > .235) { cx = lerp(FLAME.x, MENU.x + 200, toRow); cy = lerp(FLAME.y, AWAKE_Y, toRow); }
+  if (p > .31) { cx = lerp(MENU.x + 200, AWAY[0], toAway); cy = lerp(AWAKE_Y, AWAY[1], toAway); }
+  const menu = p >= .21 && p < .345;
+  const on = p >= .3;
+  let ripple = 0;
+  if (p >= .205 && p < .235) ripple = seg(p, .205, .235);
+  if (p >= .295 && p < .325) ripple = seg(p, .295, .325);
+  const hover = menu && p > .27 && p < .31 ? 0 : -1;
+  drawScreen({ cx, cy, menu, on, hover, ripple, cursor: p < .42 });
+
+  const lit = easeOut(seg(p, .74, .84));
+  flameMat.opacity = lit;
+  glow.intensity = 60 * lit;
+
+  // Centre the Mac vertically in its band (after the hero) so the space above and below it matches.
+  camera.clearViewOffset();
+  if (rise > 0) {
+    mac.updateMatrixWorld(true);
+    let minY = Infinity, maxY = -Infinity;
+    for (const [obj, pts] of BOUNDS) for (const q of pts) {
+      tmp.copy(q).applyMatrix4(obj.matrixWorld).project(camera);
+      const y = (1 - tmp.y) / 2 * h;
+      if (y < minY) minY = y; if (y > maxY) maxY = y;
+    }
+    const off = ((minY + maxY) / 2 - h / 2) * rise;
+    if (Math.abs(off) > .5) camera.setViewOffset(w, h, 0, off, w, h);
+  }
+
+  renderer.render(scene, camera);
+}
+
+let queued = false;
+const request = () => { if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; frame(); }); } };
+addEventListener('plp', request);
+addEventListener('resize', request);
+new ResizeObserver(request).observe(canvas);
+frame();
+</script>
+<script>
+// Analytics: GoatCounter (cookie-free). Counts page views, the tagged link clicks
+// (data-goatcounter-click) and how far people get down the page.
+(() => {
+  const CODE = 'sudolabs';
+  if (location.hostname !== 'pilotlight.sudolabs.nz') return; // only count the live site, not previews
+  const s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://gc.zgo.at/count.js';
+  s.dataset.goatcounter = `https://${CODE}.goatcounter.com/count`;
+  document.head.append(s);
+
+  const sent = new Set();
+  const event = (name, title) => {
+    if (sent.has(name)) return;
+    const gc = window.goatcounter;
+    if (!gc || !gc.count) { setTimeout(() => event(name, title), 1000); return; }
+    sent.add(name);
+    gc.count({ path: name, title, event: true });
+  };
+  // Reached each part of the page (the funnel toward Download and Support).
+  const marks = [['#why', 'reached-overview'], ['#features', 'reached-features'], ['#specs', 'reached-specs'], ['#install', 'reached-install'], ['#support', 'reached-support']];
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { event(e.target.dataset.mark, 'Scrolled to ' + e.target.id); io.unobserve(e.target); }
+  }), { threshold: .3 });
+  marks.forEach(([sel, name]) => { const el = document.querySelector(sel); if (el) { el.dataset.mark = name; io.observe(el); } });
+  // Watched the whole lid-close animation.
+  addEventListener('plp', () => { if (window.plP > .95) event('finished-lid-animation', 'Finished the lid animation'); });
+})();
+</script>
+</body>
+</html>
