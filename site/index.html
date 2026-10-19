@@ -127,7 +127,8 @@ h3{font-weight:700;letter-spacing:-.02em;line-height:1.15;text-wrap:balance}
 /* The close: pinned stage */
 .close{position:relative;height:380vh}
 .stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
-.stage::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 45% at 50% 62%,rgba(76,120,210,calc(.20*var(--screen,1))) 0%,transparent 70%),radial-gradient(40% 36% at 50% 66%,rgba(255,122,46,calc(.30*var(--flameOn,0))) 0%,transparent 70%),linear-gradient(#05070C 0%,var(--night) 100%);pointer-events:none}
+/* Glows are sized from the width so they stay round on tall phones, and centred on the Mac's band (--glowY). */
+.stage::before{content:"";position:absolute;inset:0;background:radial-gradient(min(70vw,760px) min(42vw,440px) at 50% var(--glowY,62%),rgba(76,120,210,calc(.20*var(--screen,1))) 0%,transparent 70%),radial-gradient(min(48vw,440px) min(30vw,280px) at 50% var(--glowY,62%),rgba(255,122,46,calc(.30*var(--flameOn,0))) 0%,transparent 70%),linear-gradient(#05070C 0%,var(--night) 100%);pointer-events:none}
 #gl{position:absolute;left:0;right:0;top:var(--glTop,0px);bottom:var(--glBottom,0px);width:100%;height:calc(100% - var(--glTop,0px) - var(--glBottom,0px));display:block;pointer-events:none}
 .fallback{display:none;position:absolute;left:50%;top:52%;width:min(220px,40vw);transform:translate(-50%,-50%)}
 .no3d .fallback{display:block}
@@ -550,6 +551,7 @@ open ~/Applications/"Pilot Light.app"</code></pre>
     const side = false; // readout always sits in its own row under the Mac
     const glBottom = side ? 0 : stage.clientHeight - readout.offsetTop + 8;
     stage.style.setProperty('--glBottom', glBottom + 'px');
+    stage.style.setProperty('--glowY', (capTop + capH + 8 + (stage.clientHeight - (capTop + capH + 8) - glBottom) / 2) + 'px');
   };
 
 
